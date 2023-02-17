@@ -48,9 +48,9 @@ HilInterfaceNode::HilInterfaceNode() :
   const Eigen::Quaterniond q_S_B = roll_angle * pitch_angle * yaw_angle;
 
   if (sensor_level_hil)
-    hil_interface_ = std::auto_ptr<HilSensorLevelInterface>(new HilSensorLevelInterface(q_S_B));
+    hil_interface_ = std::unique_ptr<HilSensorLevelInterface>(new HilSensorLevelInterface(q_S_B));
   else
-    hil_interface_ = std::auto_ptr<HilStateLevelInterface>(new HilStateLevelInterface(q_S_B));
+    hil_interface_ = std::unique_ptr<HilStateLevelInterface>(new HilStateLevelInterface(q_S_B));
 
   rate_ = ros::Rate(hil_frequency);
 
