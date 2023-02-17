@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.14.0)
 project(rotors_hil_interface)
 
-add_definitions(-std=c++11)
+add_definitions(-std=c++17)
 
 find_package(Mavlink QUIET)
 
@@ -27,7 +27,7 @@ find_package(
              roscpp
              sensor_msgs)
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS
@@ -43,14 +43,15 @@ catkin_package(
   sensor_msgs
   DEPENDS)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS}
-                    ${mavros_msgs_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${mavros_msgs_INCLUDE_DIRS})
 
 add_library(rotors_hil_interface src/hil_sensor_level_interface.cpp
                                  src/hil_state_level_interface.cpp)
-
-target_link_libraries(rotors_hil_interface ${catkin_LIBRARIES}
-                      ${mavros_LIBRARIES})
+target_compile_options(rotors_hil_interface
+                       PUBLIC -Wno-address-of-packed-member)
+target_link_libraries(
+  rotors_hil_interface PUBLIC ${catkin_LIBRARIES} ${mavros_LIBRARIES}
+                              Eigen3::Eigen)
 add_dependencies(rotors_hil_interface ${catkin_EXPORTED_TARGETS}
                  ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
 

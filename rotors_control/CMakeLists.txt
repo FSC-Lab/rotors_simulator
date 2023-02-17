@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.14.0)
 project(rotors_control)
 
-add_definitions(-std=c++11)
+add_definitions(-std=c++17)
 
 find_package(catkin REQUIRED COMPONENTS geometry_msgs mav_msgs nav_msgs roscpp
                                         sensor_msgs cmake_modules)
