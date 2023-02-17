@@ -31,11 +31,9 @@ GazeboFwDynamicsPlugin::GazeboFwDynamicsPlugin()
       delta_flap_(0.0),
       delta_rudder_(0.0),
       throttle_(0.0),
-      pubs_and_subs_created_(false) {
-}
+      pubs_and_subs_created_(false) {}
 
-GazeboFwDynamicsPlugin::~GazeboFwDynamicsPlugin() {
-}
+GazeboFwDynamicsPlugin::~GazeboFwDynamicsPlugin() {}
 
 void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
                                   sdf::ElementPtr _sdf) {
@@ -85,7 +83,7 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
     aero_params_.LoadAeroParamsYAML(aero_params_yaml);
   } else {
     gzwarn << "[gazebo_fw_dynamics_plugin] No aerodynamic paramaters YAML file"
-        << " specified, using default Techpod parameters.\n";
+           << " specified, using default Techpod parameters.\n";
   }
 
   // Get the path to fixed-wing vehicle parameters YAML file. If not provided,
@@ -97,27 +95,30 @@ void GazeboFwDynamicsPlugin::Load(physics::ModelPtr _model,
     vehicle_params_.LoadVehicleParamsYAML(vehicle_params_yaml);
   } else {
     gzwarn << "[gazebo_fw_dynamics_plugin] No vehicle paramaters YAML file"
-        << " specified, using default Techpod parameters.\n";
+           << " specified, using default Techpod parameters.\n";
   }
 
   // Get the rest of the sdf parameters.
-  getSdfParam<bool>(_sdf, "isInputJoystick", is_input_joystick_,
-                    kDefaultIsInputJoystick);
-  getSdfParam<std::string>(_sdf, "actuatorsSubTopic",
+  getSdfParam<bool>(
+      _sdf, "isInputJoystick", is_input_joystick_, kDefaultIsInputJoystick);
+  getSdfParam<std::string>(_sdf,
+                           "actuatorsSubTopic",
                            actuators_sub_topic_,
                            mav_msgs::default_topics::COMMAND_ACTUATORS);
-  getSdfParam<std::string>(_sdf, "rollPitchYawrateThrustSubTopic",
-                           roll_pitch_yawrate_thrust_sub_topic_,
-                           mav_msgs::default_topics::
-                               COMMAND_ROLL_PITCH_YAWRATE_THRUST);
-  getSdfParam<std::string>(_sdf, "windSpeedSubTopic",
+  getSdfParam<std::string>(
+      _sdf,
+      "rollPitchYawrateThrustSubTopic",
+      roll_pitch_yawrate_thrust_sub_topic_,
+      mav_msgs::default_topics::COMMAND_ROLL_PITCH_YAWRATE_THRUST);
+  getSdfParam<std::string>(_sdf,
+                           "windSpeedSubTopic",
                            wind_speed_sub_topic_,
                            mav_msgs::default_topics::WIND_SPEED);
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&GazeboFwDynamicsPlugin::OnUpdate, this, _1));
+      boost::bind(&GazeboFwDynamicsPlugin::OnUpdate, this, _1));
 }
 
 void GazeboFwDynamicsPlugin::OnUpdate(const common::UpdateInfo& _info) {
@@ -167,7 +168,8 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
     alpha = aero_params_.alpha_min;
 
   // Pre-compute the common component in the force and moment calculations.
-  const double q_bar_S = 0.5 * kAirDensity * V * V * vehicle_params_.wing_surface;
+  const double q_bar_S =
+      0.5 * kAirDensity * V * V * vehicle_params_.wing_surface;
 
   // Combine some of the control surface deflections.
   double aileron_sum = delta_aileron_left_ + delta_aileron_right_;
@@ -176,81 +178,78 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
   double flap_diff = 0.0;
 
   // Compute the forces in the wind frame.
-  const double drag = q_bar_S *
+  const double drag =
+      q_bar_S *
       (aero_params_.c_drag_alpha.dot(
            Eigen::Vector3d(1.0, alpha, alpha * alpha)) +
-       aero_params_.c_drag_beta.dot(
-           Eigen::Vector3d(0.0, beta, beta * beta)) +
+       aero_params_.c_drag_beta.dot(Eigen::Vector3d(0.0, beta, beta * beta)) +
        aero_params_.c_drag_delta_ail.dot(
            Eigen::Vector3d(0.0, aileron_sum, aileron_sum * aileron_sum)) +
        aero_params_.c_drag_delta_flp.dot(
            Eigen::Vector3d(0.0, flap_sum, flap_sum * flap_sum)));
 
-  const double side_force = q_bar_S *
-      (aero_params_.c_side_force_beta.dot(
-           Eigen::Vector2d(0.0, beta)));
+  const double side_force =
+      q_bar_S *
+      (aero_params_.c_side_force_beta.dot(Eigen::Vector2d(0.0, beta)));
 
-  const double lift = q_bar_S *
+  const double lift =
+      q_bar_S *
       (aero_params_.c_lift_alpha.dot(
            Eigen::Vector4d(1.0, alpha, alpha * alpha, alpha * alpha * alpha)) +
-       aero_params_.c_lift_delta_ail.dot(
-           Eigen::Vector2d(0.0, aileron_sum)) +
-       aero_params_.c_lift_delta_flp.dot(
-           Eigen::Vector2d(0.0, flap_sum)));
+       aero_params_.c_lift_delta_ail.dot(Eigen::Vector2d(0.0, aileron_sum)) +
+       aero_params_.c_lift_delta_flp.dot(Eigen::Vector2d(0.0, flap_sum)));
 
   const Eigen::Vector3d forces_Wind(-drag, side_force, -lift);
 
   // Non-dimensionalize the angular rates for inclusion in the computation of
   // moments. To avoid division by zero, there is a minimum air speed threshold
   // below which the values are zero.
-  const double p_hat = (V < kMinAirSpeedThresh) ? 0.0 :
-      p * vehicle_params_.wing_span / (2.0 * V);
-  const double q_hat = (V < kMinAirSpeedThresh) ? 0.0 :
-      q * vehicle_params_.chord_length / (2.0 * V);
-  const double r_hat = (V < kMinAirSpeedThresh) ? 0.0 :
-      r * vehicle_params_.wing_span / (2.0 * V);
+  const double p_hat = (V < kMinAirSpeedThresh)
+                           ? 0.0
+                           : p * vehicle_params_.wing_span / (2.0 * V);
+  const double q_hat = (V < kMinAirSpeedThresh)
+                           ? 0.0
+                           : q * vehicle_params_.chord_length / (2.0 * V);
+  const double r_hat = (V < kMinAirSpeedThresh)
+                           ? 0.0
+                           : r * vehicle_params_.wing_span / (2.0 * V);
 
   // Compute the moments in the wind frame.
-  const double rolling_moment = q_bar_S * vehicle_params_.wing_span *
-      (aero_params_.c_roll_moment_beta.dot(
-           Eigen::Vector2d(0.0, beta)) +
-       aero_params_.c_roll_moment_p.dot(
-           Eigen::Vector2d(0.0, p_hat)) +
-       aero_params_.c_roll_moment_r.dot(
-           Eigen::Vector2d(0.0, r_hat)) +
+  const double rolling_moment =
+      q_bar_S * vehicle_params_.wing_span *
+      (aero_params_.c_roll_moment_beta.dot(Eigen::Vector2d(0.0, beta)) +
+       aero_params_.c_roll_moment_p.dot(Eigen::Vector2d(0.0, p_hat)) +
+       aero_params_.c_roll_moment_r.dot(Eigen::Vector2d(0.0, r_hat)) +
        aero_params_.c_roll_moment_delta_ail.dot(
            Eigen::Vector2d(0.0, aileron_diff)) +
        aero_params_.c_roll_moment_delta_flp.dot(
            Eigen::Vector2d(0.0, flap_diff)));
 
-  const double pitching_moment = q_bar_S * vehicle_params_.chord_length *
-      (aero_params_.c_pitch_moment_alpha.dot(
-           Eigen::Vector2d(1.0, alpha)) +
-       aero_params_.c_pitch_moment_q.dot(
-           Eigen::Vector2d(0.0, q_hat)) +
+  const double pitching_moment =
+      q_bar_S * vehicle_params_.chord_length *
+      (aero_params_.c_pitch_moment_alpha.dot(Eigen::Vector2d(1.0, alpha)) +
+       aero_params_.c_pitch_moment_q.dot(Eigen::Vector2d(0.0, q_hat)) +
        aero_params_.c_pitch_moment_delta_elv.dot(
            Eigen::Vector2d(0.0, delta_elevator_)));
 
-  const double yawing_moment = q_bar_S * vehicle_params_.wing_span *
-      (aero_params_.c_yaw_moment_beta.dot(
-           Eigen::Vector2d(0.0, beta)) +
-       aero_params_.c_yaw_moment_r.dot(
-           Eigen::Vector2d(0.0, r_hat)) +
+  const double yawing_moment =
+      q_bar_S * vehicle_params_.wing_span *
+      (aero_params_.c_yaw_moment_beta.dot(Eigen::Vector2d(0.0, beta)) +
+       aero_params_.c_yaw_moment_r.dot(Eigen::Vector2d(0.0, r_hat)) +
        aero_params_.c_yaw_moment_delta_rud.dot(
            Eigen::Vector2d(0.0, delta_rudder_)));
 
-  const Eigen::Vector3d moments_Wind(rolling_moment,
-                                     pitching_moment,
-                                     yawing_moment);
+  const Eigen::Vector3d moments_Wind(
+      rolling_moment, pitching_moment, yawing_moment);
 
   // Compute the thrust force in the body frame.
   const double thrust = aero_params_.c_thrust.dot(
       Eigen::Vector3d(1.0, throttle_, throttle_ * throttle_));
 
-  const Eigen::Vector3d force_thrust_B = thrust * Eigen::Vector3d(
-      cos(vehicle_params_.thrust_inclination),
-      0.0,
-      sin(vehicle_params_.thrust_inclination));
+  const Eigen::Vector3d force_thrust_B =
+      thrust * Eigen::Vector3d(cos(vehicle_params_.thrust_inclination),
+                               0.0,
+                               sin(vehicle_params_.thrust_inclination));
 
   // Compute the transform between the body frame and the wind frame.
   double ca = cos(alpha);
@@ -259,9 +258,7 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
   double sb = sin(beta);
 
   Eigen::Matrix3d R_Wind_B;
-  R_Wind_B << ca * cb, sb, sa * cb,
-              -sb * ca, cb, -sa * sb,
-              -sa, 0.0, ca;
+  R_Wind_B << ca * cb, sb, sa * cb, -sb * ca, cb, -sa * sb, -sa, 0.0, ca;
 
   const Eigen::Matrix3d R_Wind_B_t = R_Wind_B.transpose();
 
@@ -272,9 +269,9 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
   // Once again account for the difference between our body frame orientation
   // and the traditional aerodynamics frame.
   const ignition::math::Vector3d forces =
-      ignition::math::Vector3d (forces_B[0], -forces_B[1], -forces_B[2]);
+      ignition::math::Vector3d(forces_B[0], -forces_B[1], -forces_B[2]);
   const ignition::math::Vector3d moments =
-      ignition::math::Vector3d (moments_B[0], -moments_B[1], -moments_B[2]);
+      ignition::math::Vector3d(moments_B[0], -moments_B[1], -moments_B[2]);
 
   // Apply the calculated forced and moments to the main body link.
   link_->AddRelativeForce(forces);
@@ -284,7 +281,7 @@ void GazeboFwDynamicsPlugin::UpdateForcesAndMoments() {
 double GazeboFwDynamicsPlugin::NormalizedInputToAngle(
     const ControlSurface& surface, double input) {
   return (surface.deflection_max + surface.deflection_min) * 0.5 +
-      (surface.deflection_max - surface.deflection_min) * 0.5 * input;
+         (surface.deflection_max - surface.deflection_min) * 0.5 * input;
 }
 
 void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
@@ -322,15 +319,15 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
     // === ROLL_PITCH_YAWRATE_THRUST MSG SETUP (ROS->GAZEBO) === //
     // ========================================================= //
 
-    roll_pitch_yawrate_thrust_sub_ =
-        node_handle_->Subscribe("~/" + namespace_ + "/" +
-            roll_pitch_yawrate_thrust_sub_topic_,
-            &GazeboFwDynamicsPlugin::RollPitchYawrateThrustCallback, this);
+    roll_pitch_yawrate_thrust_sub_ = node_handle_->Subscribe(
+        "~/" + namespace_ + "/" + roll_pitch_yawrate_thrust_sub_topic_,
+        &GazeboFwDynamicsPlugin::RollPitchYawrateThrustCallback,
+        this);
 
-    connect_ros_to_gazebo_topic_msg.set_ros_topic(namespace_ + "/" +
-        roll_pitch_yawrate_thrust_sub_topic_);
-    connect_ros_to_gazebo_topic_msg.set_gazebo_topic("~/" + namespace_ + "/" +
-        roll_pitch_yawrate_thrust_sub_topic_);
+    connect_ros_to_gazebo_topic_msg.set_ros_topic(
+        namespace_ + "/" + roll_pitch_yawrate_thrust_sub_topic_);
+    connect_ros_to_gazebo_topic_msg.set_gazebo_topic(
+        "~/" + namespace_ + "/" + roll_pitch_yawrate_thrust_sub_topic_);
     connect_ros_to_gazebo_topic_msg.set_msgtype(
         gz_std_msgs::ConnectRosToGazeboTopic::ROLL_PITCH_YAWRATE_THRUST);
   } else {
@@ -356,20 +353,25 @@ void GazeboFwDynamicsPlugin::CreatePubsAndSubs() {
 }
 
 void GazeboFwDynamicsPlugin::ActuatorsCallback(
-    GzActuatorsMsgPtr &actuators_msg) {
+    GzActuatorsMsgPtr& actuators_msg) {
   if (kPrintOnMsgCallback) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-  delta_aileron_left_ = NormalizedInputToAngle(vehicle_params_.aileron_left,
+  delta_aileron_left_ = NormalizedInputToAngle(
+      vehicle_params_.aileron_left,
       actuators_msg->normalized(vehicle_params_.aileron_left.channel));
-  delta_aileron_right_ = NormalizedInputToAngle(vehicle_params_.aileron_right,
+  delta_aileron_right_ = NormalizedInputToAngle(
+      vehicle_params_.aileron_right,
       actuators_msg->normalized(vehicle_params_.aileron_right.channel));
-  delta_elevator_ = NormalizedInputToAngle(vehicle_params_.elevator,
+  delta_elevator_ = NormalizedInputToAngle(
+      vehicle_params_.elevator,
       actuators_msg->normalized(vehicle_params_.elevator.channel));
-  delta_flap_ = NormalizedInputToAngle(vehicle_params_.flap,
+  delta_flap_ = NormalizedInputToAngle(
+      vehicle_params_.flap,
       actuators_msg->normalized(vehicle_params_.flap.channel));
-  delta_rudder_ = NormalizedInputToAngle(vehicle_params_.rudder,
+  delta_rudder_ = NormalizedInputToAngle(
+      vehicle_params_.rudder,
       actuators_msg->normalized(vehicle_params_.rudder.channel));
 
   throttle_ = actuators_msg->normalized(vehicle_params_.throttle_channel);
@@ -381,14 +383,14 @@ void GazeboFwDynamicsPlugin::RollPitchYawrateThrustCallback(
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-  delta_aileron_left_ = NormalizedInputToAngle(vehicle_params_.aileron_left,
-      roll_pitch_yawrate_thrust_msg->roll());
-  delta_aileron_right_ = -NormalizedInputToAngle(vehicle_params_.aileron_right,
-      roll_pitch_yawrate_thrust_msg->roll());
-  delta_elevator_ = NormalizedInputToAngle(vehicle_params_.elevator,
-      roll_pitch_yawrate_thrust_msg->pitch());
-  delta_rudder_ = NormalizedInputToAngle(vehicle_params_.rudder,
-      roll_pitch_yawrate_thrust_msg->yaw_rate());
+  delta_aileron_left_ = NormalizedInputToAngle(
+      vehicle_params_.aileron_left, roll_pitch_yawrate_thrust_msg->roll());
+  delta_aileron_right_ = -NormalizedInputToAngle(
+      vehicle_params_.aileron_right, roll_pitch_yawrate_thrust_msg->roll());
+  delta_elevator_ = NormalizedInputToAngle(
+      vehicle_params_.elevator, roll_pitch_yawrate_thrust_msg->pitch());
+  delta_rudder_ = NormalizedInputToAngle(
+      vehicle_params_.rudder, roll_pitch_yawrate_thrust_msg->yaw_rate());
 
   throttle_ = roll_pitch_yawrate_thrust_msg->thrust().x();
 }

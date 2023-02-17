@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include "rotors_gazebo_plugins/external/gazebo_geotagged_images_plugin.h"
 
 #include <math.h>
-#include <string>
-#include <iostream>
 
 #include <boost/filesystem.hpp>
+#include <iostream>
 #include <opencv2/opencv.hpp>
+#include <string>
 
 #include "rotors_gazebo_plugins/common.h"
 
@@ -32,37 +32,32 @@ using namespace cv;
 
 GZ_REGISTER_SENSOR_PLUGIN(GeotaggedImagesPlugin)
 
+GeotaggedImagesPlugin::GeotaggedImagesPlugin()
+    : SensorPlugin(), width_(0), height_(0), depth_(0), imageCounter_(0) {}
 
-GeotaggedImagesPlugin::GeotaggedImagesPlugin() :
-    SensorPlugin(), width_(0), height_(0), depth_(0), imageCounter_(0) {}
-
-GeotaggedImagesPlugin::~GeotaggedImagesPlugin()
-{
+GeotaggedImagesPlugin::~GeotaggedImagesPlugin() {
   this->parentSensor_.reset();
   this->camera_.reset();
 }
 
-void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
-{
-  if(kPrintOnPluginLoad) {
+void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor,
+                                 sdf::ElementPtr sdf) {
+  if (kPrintOnPluginLoad) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-  if (!sensor)
-    gzerr << "Invalid sensor pointer.\n";
+  if (!sensor) gzerr << "Invalid sensor pointer.\n";
 
   this->parentSensor_ =
-    std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
+      std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
 
-  if (!this->parentSensor_)
-  {
+  if (!this->parentSensor_) {
     gzerr << "GeotaggedImagesPlugin requires a CameraSensor.\n";
   }
 
   this->camera_ = this->parentSensor_->Camera();
 
-  if (!this->parentSensor_)
-  {
+  if (!this->parentSensor_) {
     gzerr << "GeotaggedImagesPlugin not attached to a camera sensor\n";
     return;
   }
@@ -77,28 +72,31 @@ void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
   if (sdf->HasElement("robotNamespace")) {
     namespace_ = sdf->GetElement("robotNamespace")->Get<std::string>();
   } else {
-    gzwarn << "[gazebo_geotagging_images_camera_plugin] Please specify a robotNamespace.\n";
+    gzwarn << "[gazebo_geotagging_images_camera_plugin] Please specify a "
+              "robotNamespace.\n";
   }
 
   this->storeIntervalSec_ = 1;
   if (sdf->HasElement("interval")) {
-	this->storeIntervalSec_ = sdf->GetElement("interval")->Get<float>();
+    this->storeIntervalSec_ = sdf->GetElement("interval")->Get<float>();
   }
 
   destWidth_ = width_;
   if (sdf->HasElement("width")) {
-	destWidth_ = sdf->GetElement("width")->Get<int>();
+    destWidth_ = sdf->GetElement("width")->Get<int>();
   }
   destHeight_ = height_;
   if (sdf->HasElement("height")) {
-	destHeight_ = sdf->GetElement("height")->Get<int>();
+    destHeight_ = sdf->GetElement("height")->Get<int>();
   }
 
-
-  //check if exiftool exists
+  // check if exiftool exists
   if (system("exiftool -ver &>/dev/null") != 0) {
-    gzerr << "exiftool not found. geotagging_images plugin will be disabled" << endl;
-    gzerr << "On Ubuntu, use 'sudo apt-get install libimage-exiftool-perl' to install" << endl;
+    gzerr << "exiftool not found. geotagging_images plugin will be disabled"
+          << endl;
+    gzerr << "On Ubuntu, use 'sudo apt-get install libimage-exiftool-perl' to "
+             "install"
+          << endl;
     return;
   }
 
@@ -108,26 +106,25 @@ void GeotaggedImagesPlugin::Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf)
   this->parentSensor_->SetActive(true);
 
   this->newFrameConnection_ = this->camera_->ConnectNewImageFrame(
-    boost::bind(&GeotaggedImagesPlugin::OnNewFrame, this, _1));
+      boost::bind(&GeotaggedImagesPlugin::OnNewFrame, this, _1));
 
   // This topic is published to by gazebo_mavlink_interface.cpp
   /// \todo Should this be an absolute topic!?!
-  gpsSub_ = node_handle_->Subscribe("~/gps_position", &GeotaggedImagesPlugin::OnNewGpsPosition, this);
+  gpsSub_ = node_handle_->Subscribe(
+      "~/gps_position", &GeotaggedImagesPlugin::OnNewGpsPosition, this);
 
   storageDir_ = "frames";
-  boost::filesystem::remove_all(storageDir_); //clear existing images
+  boost::filesystem::remove_all(storageDir_);  // clear existing images
   boost::filesystem::create_directory(storageDir_);
 }
 
-void GeotaggedImagesPlugin::OnNewGpsPosition(ConstVector3dPtr& v)
-{
+void GeotaggedImagesPlugin::OnNewGpsPosition(ConstVector3dPtr& v) {
   lastGpsPosition_ = *v;
-  //gzdbg << "got gps pos: "<<lastGpsPosition_.x()<<", "<<lastGpsPosition.y()<<endl;
+  // gzdbg << "got gps pos: "<<lastGpsPosition_.x()<<",
+  // "<<lastGpsPosition.y()<<endl;
 }
 
-void GeotaggedImagesPlugin::OnNewFrame(const unsigned char * image)
-{
-
+void GeotaggedImagesPlugin::OnNewFrame(const unsigned char* image) {
   image = this->camera_->ImageData(0);
 
   common::Time currentTime = scene_->SimTime();
@@ -137,11 +134,16 @@ void GeotaggedImagesPlugin::OnNewFrame(const unsigned char * image)
 
   Mat frame = Mat(height_, width_, CV_8UC3);
   Mat frameBGR = Mat(height_, width_, CV_8UC3);
-  frame.data = (uchar*)image; //frame has not the right color format yet -> convert
+  frame.data =
+      (uchar*)image;  // frame has not the right color format yet -> convert
   cvtColor(frame, frameBGR, cv::COLOR_RGB2BGR);
 
   char file_name[256];
-  snprintf(file_name, sizeof(file_name), "%s/DSC%05i.jpg", storageDir_.c_str(), imageCounter_);
+  snprintf(file_name,
+           sizeof(file_name),
+           "%s/DSC%05i.jpg",
+           storageDir_.c_str(),
+           imageCounter_);
 
   if (destWidth_ != width_ || destHeight_ != height_) {
     Mat frameResized;
@@ -164,16 +166,23 @@ void GeotaggedImagesPlugin::OnNewFrame(const unsigned char * image)
     lon = -lon;
     east_west = 'W';
   }
-  snprintf(gps_tag_command, sizeof(gps_tag_command),
-    "exiftool -gpslatituderef=%c -gpslongituderef=%c -gpsaltituderef=above -gpslatitude=%.9lf -gpslongitude=%.9lf"
-//    " -gpsdatetime=now -gpsmapdatum=WGS-84"
-    " -datetimeoriginal=now -gpsdop=0.8"
-    " -gpsmeasuremode=3-d -gpssatellites=13 -gpsaltitude=%.3lf -overwrite_original %s &>/dev/null",
-    north_south, east_west, lat, lon, lastGpsPosition_.z(), file_name);
+  snprintf(gps_tag_command,
+           sizeof(gps_tag_command),
+           "exiftool -gpslatituderef=%c -gpslongituderef=%c "
+           "-gpsaltituderef=above -gpslatitude=%.9lf -gpslongitude=%.9lf"
+           //    " -gpsdatetime=now -gpsmapdatum=WGS-84"
+           " -datetimeoriginal=now -gpsdop=0.8"
+           " -gpsmeasuremode=3-d -gpssatellites=13 -gpsaltitude=%.3lf "
+           "-overwrite_original %s &>/dev/null",
+           north_south,
+           east_west,
+           lat,
+           lon,
+           lastGpsPosition_.z(),
+           file_name);
 
   system(gps_tag_command);
 
   ++imageCounter_;
   lastImageTime_ = currentTime;
-
 }

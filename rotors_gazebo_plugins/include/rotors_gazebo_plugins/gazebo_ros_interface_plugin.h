@@ -18,13 +18,13 @@
 #define ROTORS_GAZEBO_PLUGINS_MSG_INTERFACE_PLUGIN_H
 
 // SYSTEM INCLUDES
-#include <random>
-
 #include <Eigen/Core>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <random>
+
 #include "gazebo/msgs/msgs.hh"
 
 //=================== ROS =====================//
@@ -34,11 +34,10 @@
 #include <tf/transform_broadcaster.h>
 
 //============= GAZEBO MSG TYPES ==============//
-#include "ConnectGazeboToRosTopic.pb.h"
-#include "ConnectRosToGazeboTopic.pb.h"
-
 #include "Actuators.pb.h"
 #include "CommandMotorSpeed.pb.h"
+#include "ConnectGazeboToRosTopic.pb.h"
+#include "ConnectRosToGazeboTopic.pb.h"
 #include "Float32.pb.h"
 #include "FluidPressure.pb.h"
 #include "Imu.pb.h"
@@ -146,8 +145,10 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
   void ConnectHelper(void (GazeboRosInterfacePlugin::*fp)(
                          const boost::shared_ptr<GazeboMsgT const>&,
                          ros::Publisher),
-                     GazeboRosInterfacePlugin* ptr, std::string gazeboNamespace,
-                     std::string gazeboTopicName, std::string rosTopicName,
+                     GazeboRosInterfacePlugin* ptr,
+                     std::string gazeboNamespace,
+                     std::string gazeboTopicName,
+                     std::string rosTopicName,
                      transport::NodePtr gz_node_handle);
 
   std::vector<gazebo::transport::NodePtr> nodePtrs_;
@@ -201,10 +202,10 @@ class GazeboRosInterfacePlugin : public WorldPlugin {
 
   void ConvertHeaderGzToRos(
       const gz_std_msgs::Header& gz_header,
-      std_msgs::Header_<std::allocator<void> >* ros_header);
+      std_msgs::Header_<std::allocator<void>>* ros_header);
 
   void ConvertHeaderRosToGz(
-      const std_msgs::Header_<std::allocator<void> >& ros_header,
+      const std_msgs::Header_<std::allocator<void>>& ros_header,
       gz_std_msgs::Header* gz_header);
 
   // ============================================ //

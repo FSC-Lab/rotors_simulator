@@ -19,22 +19,19 @@
  * limitations under the License.
  */
 
-
 #ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
 
-#include <string>
+#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
 
-#include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-
-#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
+#include <string>
 
 #include "Actuators.pb.h"
 #include "JointState.pb.h"
-
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
@@ -46,8 +43,11 @@ static const std::string kDefaultJointStatePubTopic = "joint_states";
 
 /// \brief This plugin publishes the motor speeds of your multirotor model.
 class GazeboMultirotorBasePlugin : public ModelPlugin {
-  typedef std::map<const unsigned int, const physics::JointPtr> MotorNumberToJointMap;
-  typedef std::pair<const unsigned int, const physics::JointPtr> MotorNumberToJointPair;
+  typedef std::map<const unsigned int, const physics::JointPtr>
+      MotorNumberToJointMap;
+  typedef std::pair<const unsigned int, const physics::JointPtr>
+      MotorNumberToJointPair;
+
  public:
   GazeboMultirotorBasePlugin()
       : ModelPlugin(),
@@ -63,7 +63,6 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   virtual ~GazeboMultirotorBasePlugin();
 
  protected:
-
   /// \brief Load the plugin.
   /// \param[in] _model Pointer to the model that loaded this plugin.
   /// \param[in] _sdf SDF element that describes the plugin.
@@ -74,15 +73,18 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
-
-  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
-  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called,
+  /// used
+  ///           to prevent CreatePubsAndSubs() from be called on every
+  ///           OnUpdate().
   bool pubs_and_subs_created_;
 
-  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
-  /// \details  Call this once the first time OnUpdate() is called (can't
-  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
-  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  /// \brief    Creates all required publishers and subscribers, incl. routing
+  /// of messages to/from ROS if required. \details  Call this once the first
+  /// time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee
+  ///           GazeboRosInterfacePlugin has has loaded and listening to
+  ///           ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
 
   /// \brief Pointer to the update event connection.
@@ -105,17 +107,19 @@ class GazeboMultirotorBasePlugin : public ModelPlugin {
 
   gazebo::transport::PublisherPtr motor_pub_;
 
-  /// \details    Re-used message object, defined here to reduce dynamic memory allocation.
+  /// \details    Re-used message object, defined here to reduce dynamic memory
+  /// allocation.
   gz_sensor_msgs::Actuators actuators_msg_;
 
   gazebo::transport::PublisherPtr joint_state_pub_;
 
-  /// \details    Re-used message object, defined here to reduce dynamic memory allocation.
+  /// \details    Re-used message object, defined here to reduce dynamic memory
+  /// allocation.
   gz_sensor_msgs::JointState joint_state_msg_;
 
   gazebo::transport::NodePtr node_handle_;
 };
 
-} // namespace gazebo
+}  // namespace gazebo
 
-#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H
+#endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_MULTIROTOR_BASE_PLUGIN_H

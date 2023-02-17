@@ -20,11 +20,9 @@
 
 #include "rotors_control/motor_controller.h"
 
-MotorController::MotorController() {
-}
+MotorController::MotorController() {}
 
-MotorController::~MotorController() {
-}
+MotorController::~MotorController() {}
 
 std::shared_ptr<ControllerBase> MotorController::Clone() {
   std::shared_ptr<ControllerBase> controller(new MotorController);
@@ -36,7 +34,8 @@ void MotorController::InitializeParams() {
   initialized_params_ = true;
 }
 
-void MotorController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
+void MotorController::CalculateRotorVelocities(
+    Eigen::VectorXd* rotor_velocities) const {
   assert(rotor_velocities);
   assert(initialized_params_);
 

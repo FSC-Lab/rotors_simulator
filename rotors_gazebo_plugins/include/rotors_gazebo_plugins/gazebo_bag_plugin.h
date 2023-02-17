@@ -19,34 +19,32 @@
  * limitations under the License.
  */
 
-
 #ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
 
-#include <string>
-
-#include <gazebo/common/common.hh>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <mav_msgs/Actuators.h>
 #include <mav_msgs/AttitudeThrust.h>
-#include <mav_msgs/default_topics.h>
 #include <mav_msgs/RateThrust.h>
+#include <mav_msgs/default_topics.h>
 #include <ros/ros.h>
 #include <rosbag/bag.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/common/common.hh>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <string>
+
 #include "rotors_comm/RecordRosbag.h"
 #include "rotors_comm/WindSpeed.h"
 #include "rotors_gazebo_plugins/common.h"
-
 
 namespace gazebo {
 
@@ -59,11 +57,15 @@ static constexpr bool kDefaultWaitToRecord = false;
 static constexpr bool kDefaultIsRecording = false;
 
 /// \brief    This plugin is used to create rosbag files from within gazebo.
-/// \details  This plugin is ROS dependent, and is not built if NO_ROS=TRUE is provided to
+/// \details  This plugin is ROS dependent, and is not built if NO_ROS=TRUE is
+/// provided to
 ///           CMakeLists.txt (as in the case of a PX4/Firmware build).
 class GazeboBagPlugin : public ModelPlugin {
-  typedef std::map<const unsigned int, const physics::JointPtr> MotorNumberToJointMap;
-  typedef std::pair<const unsigned int, const physics::JointPtr> MotorNumberToJointPair;
+  typedef std::map<const unsigned int, const physics::JointPtr>
+      MotorNumberToJointMap;
+  typedef std::pair<const unsigned int, const physics::JointPtr>
+      MotorNumberToJointPair;
+
  public:
   GazeboBagPlugin()
       : ModelPlugin(),
@@ -72,9 +74,11 @@ class GazeboBagPlugin : public ModelPlugin {
         ground_truth_pose_topic_(mav_msgs::default_topics::GROUND_TRUTH_POSE),
         ground_truth_twist_topic_(mav_msgs::default_topics::GROUND_TRUTH_TWIST),
         imu_topic_(mav_msgs::default_topics::IMU),
-        control_attitude_thrust_topic_(mav_msgs::default_topics::COMMAND_ATTITUDE_THRUST),
+        control_attitude_thrust_topic_(
+            mav_msgs::default_topics::COMMAND_ATTITUDE_THRUST),
         control_motor_speed_topic_(mav_msgs::default_topics::COMMAND_ACTUATORS),
-        control_rate_thrust_topic_(mav_msgs::default_topics::COMMAND_RATE_THRUST),
+        control_rate_thrust_topic_(
+            mav_msgs::default_topics::COMMAND_RATE_THRUST),
         wind_speed_topic_(mav_msgs::default_topics::WIND_SPEED),
         motor_topic_(mav_msgs::default_topics::MOTOR_MEASUREMENT),
         wrench_topic_(mav_msgs::default_topics::WRENCH),
@@ -116,11 +120,14 @@ class GazeboBagPlugin : public ModelPlugin {
 
   /// \brief Called when an WrenchStamped message is received.
   /// \param[in] force_msg A WrenchStamped message from geometry_msgs.
-  void ExternalForceCallback(const geometry_msgs::WrenchStampedConstPtr& force_msg);
+  void ExternalForceCallback(
+      const geometry_msgs::WrenchStampedConstPtr& force_msg);
 
   /// \brief Called when a MultiDOFJointTrajectoryPoint message is received.
-  /// \param[in] trajectory_msg A MultiDOFJointTrajectoryPoint message from trajectory_msgs.
-  void WaypointCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_msg);
+  /// \param[in] trajectory_msg A MultiDOFJointTrajectoryPoint message from
+  /// trajectory_msgs.
+  void WaypointCallback(
+      const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_msg);
 
   /// \brief Called when a PoseStamped message is received.
   /// \param[in] pose_msg A PoseStamped message from geometry_msgs.
@@ -128,7 +135,8 @@ class GazeboBagPlugin : public ModelPlugin {
 
   /// \brief Called when a AttitudeThrust message is received.
   /// \param[in] control_msg A AttitudeThrust message from mav_msgs.
-  void AttitudeThrustCallback(const mav_msgs::AttitudeThrustConstPtr& control_msg);
+  void AttitudeThrustCallback(
+      const mav_msgs::AttitudeThrustConstPtr& control_msg);
 
   /// \brief Called when a Actuators message is received.
   /// \param[in] control_msg A Actuators message from mav_msgs.
@@ -174,7 +182,7 @@ class GazeboBagPlugin : public ModelPlugin {
 
   /// \brief    Pointer to the ContactManager to get all collisions of this
   ///           link and its children.
-  physics::ContactManager *contact_mgr_;
+  physics::ContactManager* contact_mgr_;
 
   std::string namespace_;
   std::string ground_truth_pose_topic_;
@@ -205,7 +213,7 @@ class GazeboBagPlugin : public ModelPlugin {
   bool is_recording_;
 
   rosbag::Bag bag_;
-  ros::NodeHandle *node_handle_;
+  ros::NodeHandle* node_handle_;
 
   // Ros subscribers
   ros::Subscriber imu_sub_;
@@ -222,46 +230,43 @@ class GazeboBagPlugin : public ModelPlugin {
 
   std::ofstream csvOut;
 
-  template<class T>
+  template <class T>
   void writeBag(const std::string& topic, const ros::Time& time, const T& msg) {
     boost::mutex::scoped_lock lock(mtx_);
     try {
       bag_.write(topic, time, msg);
-    }
-    catch (rosbag::BagIOException& e) {
+    } catch (rosbag::BagIOException& e) {
       gzerr << "Error while writing to bag " << e.what() << std::endl;
-    }
-    catch (rosbag::BagException& e) {
+    } catch (rosbag::BagException& e) {
       if (time < ros::TIME_MIN) {
-        gzerr<<"Header stamp not set for msg published on topic: "<< topic << ". " << e.what() << std::endl;
-      }
-      else {
+        gzerr << "Header stamp not set for msg published on topic: " << topic
+              << ". " << e.what() << std::endl;
+      } else {
         gzerr << "Error while writing to bag " << e.what() << std::endl;
       }
     }
   }
 
-  template<class T>
-  void writeBag(const std::string& topic, const ros::Time& time, boost::shared_ptr<T const> const& msg) {
+  template <class T>
+  void writeBag(const std::string& topic,
+                const ros::Time& time,
+                boost::shared_ptr<T const> const& msg) {
     boost::mutex::scoped_lock lock(mtx_);
     try {
       bag_.write(topic, time, msg);
-    }
-    catch (rosbag::BagIOException& e) {
+    } catch (rosbag::BagIOException& e) {
       gzerr << "Error while writing to bag " << e.what() << std::endl;
-    }
-    catch (rosbag::BagException& e) {
+    } catch (rosbag::BagException& e) {
       if (time < ros::TIME_MIN) {
-        gzerr<<"Header stamp not set for msg published on topic: "<< topic << ". " << e.what() << std::endl;
-      }
-      else {
+        gzerr << "Header stamp not set for msg published on topic: " << topic
+              << ". " << e.what() << std::endl;
+      } else {
         gzerr << "Error while writing to bag " << e.what() << std::endl;
       }
     }
   }
-
 };
 
-} // namespace gazebo
+}  // namespace gazebo
 
-#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H
+#endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_BAG_PLUGIN_H

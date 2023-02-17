@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 /*
  * Desc: A dynamic controller plugin that publishes ROS image_raw camera_info
  * topic for generic camera sensor.
@@ -29,31 +29,27 @@
 #define ROTORS_GAZEBO_PLUGINS_GAZEBO_NOISYDEPTH_PLUGIN_H
 
 #include <dynamic_reconfigure/server.h>
-#include <boost/thread/mutex.hpp>
-
 #include <gazebo_plugins/GazeboRosOpenniKinectConfig.h>
 #include <gazebo_plugins/gazebo_ros_camera_utils.h>
-#include <gazebo/common/Time.hh>
-#include <gazebo/msgs/MessageTypes.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/plugins/DepthCameraPlugin.hh>
-#include <gazebo/sensors/SensorTypes.hh>
-#include <gazebo/transport/TransportTypes.hh>
-
 #include <image_transport/image_transport.h>
 #include <ros/advertise_options.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
-
-#include <sdf/Param.hh>
-
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/fill_image.h>
 #include <std_msgs/Float64.h>
 
+#include <boost/thread/mutex.hpp>
+#include <gazebo/common/Time.hh>
+#include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/plugins/DepthCameraPlugin.hh>
+#include <gazebo/sensors/SensorTypes.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <rotors_gazebo_plugins/depth_noise_model.hpp>
+#include <sdf/Param.hh>
 
 namespace gazebo {
 class GazeboNoisyDepth : public DepthCameraPlugin, GazeboRosCameraUtils {
@@ -69,26 +65,30 @@ class GazeboNoisyDepth : public DepthCameraPlugin, GazeboRosCameraUtils {
   /// \brief Advertise depth image
   virtual void Advertise();
 
-  virtual void OnNewDepthFrame(const float *_image, unsigned int _width,
-                               unsigned int _height, unsigned int _depth,
-                               const std::string &_format);
+  virtual void OnNewDepthFrame(const float* _image,
+                               unsigned int _width,
+                               unsigned int _height,
+                               unsigned int _depth,
+                               const std::string& _format);
 
  protected:
-  virtual void OnNewImageFrame(const unsigned char *_image, unsigned int _width,
-                               unsigned int _height, unsigned int _depth,
-                               const std::string &_format);
+  virtual void OnNewImageFrame(const unsigned char* _image,
+                               unsigned int _width,
+                               unsigned int _height,
+                               unsigned int _depth,
+                               const std::string& _format);
 
  private:
   void DepthImageConnect();
   void DepthImageDisconnect();
   void DepthInfoConnect();
   void DepthInfoDisconnect();
-  void FillDepthImage(const float *_src);
+  void FillDepthImage(const float* _src);
   bool FillDepthImageHelper(const uint32_t rows_arg,
                             const uint32_t cols_arg,
                             const uint32_t step_arg,
-                            const float *data_arg,
-                            sensor_msgs::Image *image_msg);
+                            const float* data_arg,
+                            sensor_msgs::Image* image_msg);
 
   virtual void PublishCameraInfo();
 
@@ -108,5 +108,5 @@ class GazeboNoisyDepth : public DepthCameraPlugin, GazeboRosCameraUtils {
   common::Time last_depth_image_camera_info_update_time_;
   sensor_msgs::Image depth_image_msg_;
 };
-}
+}  // namespace gazebo
 #endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_NOISYDEPTH_PLUGIN_H

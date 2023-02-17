@@ -30,8 +30,7 @@ GazeboMagnetometerPlugin::GazeboMagnetometerPlugin()
   // Nothing
 }
 
-GazeboMagnetometerPlugin::~GazeboMagnetometerPlugin() {
-}
+GazeboMagnetometerPlugin::~GazeboMagnetometerPlugin() {}
 
 void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model,
                                     sdf::ElementPtr _sdf) {
@@ -76,15 +75,17 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model,
   const SdfVector3 zeros3(0.0, 0.0, 0.0);
 
   // Retrieve the rest of the SDF parameters
-  getSdfParam<std::string>(_sdf, "magnetometerTopic", magnetometer_topic_,
+  getSdfParam<std::string>(_sdf,
+                           "magnetometerTopic",
+                           magnetometer_topic_,
                            mav_msgs::default_topics::MAGNETIC_FIELD);
 
   getSdfParam<double>(_sdf, "refMagNorth", ref_mag_north, kDefaultRefMagNorth);
   getSdfParam<double>(_sdf, "refMagEast", ref_mag_east, kDefaultRefMagEast);
   getSdfParam<double>(_sdf, "refMagDown", ref_mag_down, kDefaultRefMagDown);
   getSdfParam<SdfVector3>(_sdf, "noiseNormal", noise_normal, zeros3);
-  getSdfParam<SdfVector3>(_sdf, "noiseUniformInitialBias",
-                          noise_uniform_initial_bias, zeros3);
+  getSdfParam<SdfVector3>(
+      _sdf, "noiseUniformInitialBias", noise_uniform_initial_bias, zeros3);
 
   // Listen to the update event. This event is broadcast every simulation
   // iteration.
@@ -107,9 +108,10 @@ void GazeboMagnetometerPlugin::Load(physics::ModelPtr _model,
 
   // Initialize the reference magnetic field vector in world frame, taking into
   // account the initial bias
-  mag_W_ = ignition::math::Vector3d (ref_mag_north + initial_bias[0](random_generator_),
-                         ref_mag_east + initial_bias[1](random_generator_),
-                         ref_mag_down + initial_bias[2](random_generator_));
+  mag_W_ = ignition::math::Vector3d(
+      ref_mag_north + initial_bias[0](random_generator_),
+      ref_mag_east + initial_bias[1](random_generator_),
+      ref_mag_down + initial_bias[2](random_generator_));
 
   // Fill the static parts of the magnetometer message.
   mag_message_.mutable_header()->set_frame_id(frame_id_);
@@ -158,11 +160,12 @@ void GazeboMagnetometerPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Calculate the magnetic field noise.
   ignition::math::Vector3d mag_noise(noise_n_[0](random_generator_),
-                          noise_n_[1](random_generator_),
-                          noise_n_[2](random_generator_));
+                                     noise_n_[1](random_generator_),
+                                     noise_n_[2](random_generator_));
 
   // Rotate the earth magnetic field into the inertial frame
-  ignition::math::Vector3d field_B = T_W_B.Rot().RotateVectorReverse(mag_W_ + mag_noise);
+  ignition::math::Vector3d field_B =
+      T_W_B.Rot().RotateVectorReverse(mag_W_ + mag_noise);
 
   // Fill the magnetic field message
   mag_message_.mutable_header()->mutable_stamp()->set_sec(current_time.sec);

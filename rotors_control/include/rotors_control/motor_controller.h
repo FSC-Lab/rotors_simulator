@@ -30,7 +30,8 @@ class MotorController : public ControllerBase {
   virtual ~MotorController();
   virtual void InitializeParams();
   virtual std::shared_ptr<ControllerBase> Clone();
-  virtual void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
+  virtual void CalculateRotorVelocities(
+      Eigen::VectorXd* rotor_velocities) const;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
  private:
@@ -41,4 +42,4 @@ class MotorController : public ControllerBase {
   Eigen::Matrix3d inertia_matrix_;
 };
 
-#endif // ROTORS_CONTROL_MOTOR_CONTROLLER_H
+#endif  // ROTORS_CONTROL_MOTOR_CONTROLLER_H

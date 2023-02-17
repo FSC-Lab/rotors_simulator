@@ -13,53 +13,81 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #pragma once
 
-#include <string>
-
 #include <gazebo/common/Plugin.hh>
-#include <gazebo/sensors/CameraSensor.hh>
-#include <gazebo/gazebo.hh>
 #include <gazebo/common/common.hh>
+#include <gazebo/gazebo.hh>
 #include <gazebo/rendering/Camera.hh>
+#include <gazebo/sensors/CameraSensor.hh>
+#include <string>
 //#include <gazebo/util/system.hh>
-#include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/rendering/rendering.hh>
+#include <gazebo/transport/transport.hh>
 
 namespace gazebo {
 
 /// \brief    Gazebo plugin that saves geotagged camera images to disk.
 class GAZEBO_VISIBLE GeotaggedImagesPlugin : public SensorPlugin {
-  public: GeotaggedImagesPlugin();
+ public:
+  GeotaggedImagesPlugin();
 
-  public: virtual ~GeotaggedImagesPlugin();
+ public:
+  virtual ~GeotaggedImagesPlugin();
 
-  public: virtual void Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf);
+ public:
+  virtual void Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf);
 
-  public: void OnNewFrame(const unsigned char *image);
-  public: void OnNewGpsPosition(ConstVector3dPtr& v);
+ public:
+  void OnNewFrame(const unsigned char* image);
 
-  protected: float storeIntervalSec_;
-  private: int imageCounter_;
+ public:
+  void OnNewGpsPosition(ConstVector3dPtr& v);
+
+ protected:
+  float storeIntervalSec_;
+
+ private:
+  int imageCounter_;
   common::Time lastImageTime_;
 
-  protected: sensors::CameraSensorPtr parentSensor_;
-  protected: rendering::CameraPtr camera_;
-  protected: rendering::ScenePtr scene_;
-  private: event::ConnectionPtr newFrameConnection_;
-  private: std::string storageDir_;
-  private: msgs::Vector3d lastGpsPosition_;
+ protected:
+  sensors::CameraSensorPtr parentSensor_;
 
-  private: transport::NodePtr node_handle_;
-  private: std::string namespace_;
-  private: transport::SubscriberPtr gpsSub_;
+ protected:
+  rendering::CameraPtr camera_;
 
-  protected: unsigned int width_, height_, depth_;
-  protected: unsigned int destWidth_, destHeight_; ///< output size
-  protected: std::string format_;
+ protected:
+  rendering::ScenePtr scene_;
+
+ private:
+  event::ConnectionPtr newFrameConnection_;
+
+ private:
+  std::string storageDir_;
+
+ private:
+  msgs::Vector3d lastGpsPosition_;
+
+ private:
+  transport::NodePtr node_handle_;
+
+ private:
+  std::string namespace_;
+
+ private:
+  transport::SubscriberPtr gpsSub_;
+
+ protected:
+  unsigned int width_, height_, depth_;
+
+ protected:
+  unsigned int destWidth_, destHeight_;  ///< output size
+ protected:
+  std::string format_;
 };
 
-} // namespace gazebo
+}  // namespace gazebo

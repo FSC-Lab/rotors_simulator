@@ -24,6 +24,7 @@
 
 // SYSTEM LIBS
 #include <stdio.h>
+
 #include <boost/bind.hpp>
 #include <chrono>
 #include <cmath>
@@ -43,8 +44,7 @@ GazeboImuPlugin::GazeboImuPlugin()
       velocity_prev_W_(0, 0, 0),
       pubs_and_subs_created_(false) {}
 
-GazeboImuPlugin::~GazeboImuPlugin() {
-}
+GazeboImuPlugin::~GazeboImuPlugin() {}
 
 void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   if (kPrintOnPluginLoad) {
@@ -87,32 +87,40 @@ void GazeboImuPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   frame_id_ = link_name_;
 
-  getSdfParam<std::string>(_sdf, "imuTopic", imu_topic_,
-                           mav_msgs::default_topics::IMU);
-  getSdfParam<double>(_sdf, "gyroscopeNoiseDensity",
+  getSdfParam<std::string>(
+      _sdf, "imuTopic", imu_topic_, mav_msgs::default_topics::IMU);
+  getSdfParam<double>(_sdf,
+                      "gyroscopeNoiseDensity",
                       imu_parameters_.gyroscope_noise_density,
                       imu_parameters_.gyroscope_noise_density);
-  getSdfParam<double>(_sdf, "gyroscopeBiasRandomWalk",
+  getSdfParam<double>(_sdf,
+                      "gyroscopeBiasRandomWalk",
                       imu_parameters_.gyroscope_random_walk,
                       imu_parameters_.gyroscope_random_walk);
-  getSdfParam<double>(_sdf, "gyroscopeBiasCorrelationTime",
+  getSdfParam<double>(_sdf,
+                      "gyroscopeBiasCorrelationTime",
                       imu_parameters_.gyroscope_bias_correlation_time,
                       imu_parameters_.gyroscope_bias_correlation_time);
   assert(imu_parameters_.gyroscope_bias_correlation_time > 0.0);
-  getSdfParam<double>(_sdf, "gyroscopeTurnOnBiasSigma",
+  getSdfParam<double>(_sdf,
+                      "gyroscopeTurnOnBiasSigma",
                       imu_parameters_.gyroscope_turn_on_bias_sigma,
                       imu_parameters_.gyroscope_turn_on_bias_sigma);
-  getSdfParam<double>(_sdf, "accelerometerNoiseDensity",
+  getSdfParam<double>(_sdf,
+                      "accelerometerNoiseDensity",
                       imu_parameters_.accelerometer_noise_density,
                       imu_parameters_.accelerometer_noise_density);
-  getSdfParam<double>(_sdf, "accelerometerRandomWalk",
+  getSdfParam<double>(_sdf,
+                      "accelerometerRandomWalk",
                       imu_parameters_.accelerometer_random_walk,
                       imu_parameters_.accelerometer_random_walk);
-  getSdfParam<double>(_sdf, "accelerometerBiasCorrelationTime",
+  getSdfParam<double>(_sdf,
+                      "accelerometerBiasCorrelationTime",
                       imu_parameters_.accelerometer_bias_correlation_time,
                       imu_parameters_.accelerometer_bias_correlation_time);
   assert(imu_parameters_.accelerometer_bias_correlation_time > 0.0);
-  getSdfParam<double>(_sdf, "accelerometerTurnOnBiasSigma",
+  getSdfParam<double>(_sdf,
+                      "accelerometerTurnOnBiasSigma",
                       imu_parameters_.accelerometer_turn_on_bias_sigma,
                       imu_parameters_.accelerometer_turn_on_bias_sigma);
 
@@ -278,7 +286,8 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
   last_time_ = current_time;
   double t = current_time.Double();
 
-  ignition::math::Pose3d T_W_I = link_->WorldPose();  // TODO(burrimi): Check tf.
+  ignition::math::Pose3d T_W_I =
+      link_->WorldPose();  // TODO(burrimi): Check tf.
   ignition::math::Quaterniond C_W_I = T_W_I.Rot();
 
   ignition::math::Vector3d acceleration_I =
@@ -286,10 +295,10 @@ void GazeboImuPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   ignition::math::Vector3d angular_vel_I = link_->RelativeAngularVel();
 
-  Eigen::Vector3d linear_acceleration_I(acceleration_I.X(), acceleration_I.Y(),
-                                        acceleration_I.Z());
-  Eigen::Vector3d angular_velocity_I(angular_vel_I.X(), angular_vel_I.Y(),
-                                     angular_vel_I.Z());
+  Eigen::Vector3d linear_acceleration_I(
+      acceleration_I.X(), acceleration_I.Y(), acceleration_I.Z());
+  Eigen::Vector3d angular_velocity_I(
+      angular_vel_I.X(), angular_vel_I.Y(), angular_vel_I.Z());
 
   AddNoise(&linear_acceleration_I, &angular_velocity_I, dt);
 

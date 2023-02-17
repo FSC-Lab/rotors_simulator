@@ -17,17 +17,15 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_PRESSURE_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_PRESSURE_PLUGIN_H
 
-#include <random>
-
 #include <glog/logging.h>
 
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <random>
 
 #include "FluidPressure.pb.h"
-
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
@@ -39,9 +37,9 @@ static constexpr double kEarthRadiusMeters = 6356766.0;
 static constexpr double kPressureOneAtmospherePascals = 101325.0;
 static constexpr double kSeaLevelTempKelvin = 288.15;
 static constexpr double kTempLapseKelvinPerMeter = 0.0065;
-static constexpr double kAirConstantDimensionless = kGravityMagnitude *
-    kMeanMolecularAirWeightKgPerKmol /
-        (kGasConstantNmPerKmolKelvin * -kTempLapseKelvinPerMeter);
+static constexpr double kAirConstantDimensionless =
+    kGravityMagnitude * kMeanMolecularAirWeightKgPerKmol /
+    (kGasConstantNmPerKmolKelvin * -kTempLapseKelvinPerMeter);
 
 // Default values
 static const std::string kDefaultPressurePubTopic = "air_pressure";
@@ -67,14 +65,18 @@ class GazeboPressurePlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo&);
 
  private:
-  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
-  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called,
+  /// used
+  ///           to prevent CreatePubsAndSubs() from be called on every
+  ///           OnUpdate().
   bool pubs_and_subs_created_;
 
-  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
-  /// \details  Call this once the first time OnUpdate() is called (can't
-  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
-  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  /// \brief    Creates all required publishers and subscribers, incl. routing
+  /// of messages to/from ROS if required. \details  Call this once the first
+  /// time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee
+  ///           GazeboRosInterfacePlugin has has loaded and listening to
+  ///           ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
 
   /// \brief    Handle for the Gazebo node.
@@ -120,6 +122,6 @@ class GazeboPressurePlugin : public ModelPlugin {
 
   std::mt19937 random_generator_;
 };
-}
+}  // namespace gazebo
 
-#endif // ROTORS_GAZEBO_PLUGINS_PRESSURE_PLUGIN_H
+#endif  // ROTORS_GAZEBO_PLUGINS_PRESSURE_PLUGIN_H

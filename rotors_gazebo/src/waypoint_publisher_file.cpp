@@ -18,10 +18,6 @@
  * limitations under the License.
  */
 
-#include <fstream>
-#include <iostream>
-
-#include <Eigen/Geometry>
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/default_topics.h>
 #include <mav_msgs/eigen_mav_msgs.h>
@@ -29,23 +25,22 @@
 #include <sensor_msgs/Imu.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
+#include <Eigen/Geometry>
+#include <fstream>
+#include <iostream>
+
 bool sim_running = false;
 
 static const int64_t kNanoSecondsInSecond = 1000000000;
 
-void callback(const sensor_msgs::ImuPtr& msg) {
-  sim_running = true;
-}
+void callback(const sensor_msgs::ImuPtr& msg) { sim_running = true; }
 
 class WaypointWithTime {
  public:
-  WaypointWithTime()
-      : waiting_time(0), yaw(0.0) {
-  }
+  WaypointWithTime() : waiting_time(0), yaw(0.0) {}
 
   WaypointWithTime(double t, float x, float y, float z, float _yaw)
-      : position(x, y, z), yaw(_yaw), waiting_time(t) {
-  }
+      : position(x, y, z), yaw(_yaw), waiting_time(t) {}
 
   Eigen::Vector3d position;
   double yaw;
@@ -62,8 +57,10 @@ int main(int argc, char** argv) {
   ros::removeROSArgs(argc, argv, args);
 
   if (args.size() != 2 && args.size() != 3) {
-    ROS_ERROR("Usage: waypoint_publisher <waypoint_file>"
-        "\nThe waypoint file should be structured as: space separated: wait_time [s] x[m] y[m] z[m] yaw[deg])");
+    ROS_ERROR(
+        "Usage: waypoint_publisher <waypoint_file>"
+        "\nThe waypoint file should be structured as: space separated: "
+        "wait_time [s] x[m] y[m] z[m] yaw[deg])");
     return -1;
   }
 
@@ -79,7 +76,7 @@ int main(int argc, char** argv) {
       waypoints.push_back(WaypointWithTime(t, x, y, z, yaw * DEG_2_RAD));
     }
     wp_file.close();
-    ROS_INFO("Read %d waypoints.", (int) waypoints.size());
+    ROS_INFO("Read %d waypoints.", (int)waypoints.size());
   } else {
     ROS_ERROR_STREAM("Unable to open poses file: " << args.at(1));
     return -1;
@@ -90,7 +87,7 @@ int main(int argc, char** argv) {
 
   ros::Publisher wp_pub =
       nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
-      mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
+          mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
 
   ROS_INFO("Wait for simulation to become ready...");
 
@@ -101,12 +98,14 @@ int main(int argc, char** argv) {
 
   ROS_INFO("...ok");
 
-  // Wait for 30s such that everything can settle and the mav flies to the initial position.
+  // Wait for 30s such that everything can settle and the mav flies to the
+  // initial position.
   ros::Duration(30).sleep();
 
   ROS_INFO("Start publishing waypoints.");
 
-  trajectory_msgs::MultiDOFJointTrajectoryPtr msg(new trajectory_msgs::MultiDOFJointTrajectory);
+  trajectory_msgs::MultiDOFJointTrajectoryPtr msg(
+      new trajectory_msgs::MultiDOFJointTrajectory);
   msg->header.stamp = ros::Time::now();
   msg->points.resize(waypoints.size());
   msg->joint_names.push_back("base_link");
@@ -119,9 +118,11 @@ int main(int argc, char** argv) {
     trajectory_point.setFromYaw(wp.yaw);
     trajectory_point.time_from_start_ns = time_from_start_ns;
 
-    time_from_start_ns += static_cast<int64_t>(wp.waiting_time * kNanoSecondsInSecond);
+    time_from_start_ns +=
+        static_cast<int64_t>(wp.waiting_time * kNanoSecondsInSecond);
 
-    mav_msgs::msgMultiDofJointTrajectoryPointFromEigen(trajectory_point, &msg->points[i]);
+    mav_msgs::msgMultiDofJointTrajectoryPointFromEigen(trajectory_point,
+                                                       &msg->points[i]);
   }
   wp_pub.publish(msg);
 

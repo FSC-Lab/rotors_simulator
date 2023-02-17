@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 /* Desc: A basic gimbal controller
  * Author: John Hsu
  */
@@ -21,90 +21,132 @@
 #ifndef _GAZEBO_GIMBAL_CONTROLLER_PLUGIN_HH_
 #define _GAZEBO_GIMBAL_CONTROLLER_PLUGIN_HH_
 
-#include <string>
-#include <vector>
-
 #include <gazebo/common/PID.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
+#include <gazebo/sensors/sensors.hh>
 #include <gazebo/transport/transport.hh>
 #include <gazebo/util/system.hh>
-#include <gazebo/sensors/sensors.hh>
+#include <string>
+#include <vector>
 
-namespace gazebo
-{
-  class GAZEBO_VISIBLE GimbalControllerPlugin : public ModelPlugin
-  {
-    /// \brief Constructor
-    public: GimbalControllerPlugin();
+namespace gazebo {
+class GAZEBO_VISIBLE GimbalControllerPlugin : public ModelPlugin {
+  /// \brief Constructor
+ public:
+  GimbalControllerPlugin();
 
-    public: virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+ public:
+  virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
-    public: virtual void Init();
+ public:
+  virtual void Init();
 
-    private: void OnUpdate();
+ private:
+  void OnUpdate();
 
-    private: void OnPitchStringMsg(ConstAnyPtr &_msg);
-    private: void OnRollStringMsg(ConstAnyPtr &_msg);
-    private: void OnYawStringMsg(ConstAnyPtr &_msg);
+ private:
+  void OnPitchStringMsg(ConstAnyPtr& _msg);
 
-    /// \TODO something to move into Angle class
-    /// \brief returns _angle1 normalized about
-    /// (_reference - M_PI, _reference + M_PI]
-    /// \param[in] _angle1 input angle
-    /// \param[in] _reference reference input angle for normalization
-    /// \return normalized _angle1 about _reference
-    private: double NormalizeAbout(double _angle, double _reference);
+ private:
+  void OnRollStringMsg(ConstAnyPtr& _msg);
 
-    /// \TODO something to move into Angle class
-    /// \brief returns shortest angular distance from _from to _to
-    /// \param[in] _from starting anglular position
-    /// \param[in] _to end angular position
-    /// \return distance traveled from starting to end angular positions
-    private: double ShortestAngularDistance(double _from, double _to);
+ private:
+  void OnYawStringMsg(ConstAnyPtr& _msg);
 
-    private: sdf::ElementPtr sdf;
+  /// \TODO something to move into Angle class
+  /// \brief returns _angle1 normalized about
+  /// (_reference - M_PI, _reference + M_PI]
+  /// \param[in] _angle1 input angle
+  /// \param[in] _reference reference input angle for normalization
+  /// \return normalized _angle1 about _reference
+ private:
+  double NormalizeAbout(double _angle, double _reference);
 
-    private: std::vector<event::ConnectionPtr> connections;
+  /// \TODO something to move into Angle class
+  /// \brief returns shortest angular distance from _from to _to
+  /// \param[in] _from starting anglular position
+  /// \param[in] _to end angular position
+  /// \return distance traveled from starting to end angular positions
+ private:
+  double ShortestAngularDistance(double _from, double _to);
 
-    private: transport::SubscriberPtr pitchSub;
-    private: transport::SubscriberPtr rollSub;
-    private: transport::SubscriberPtr yawSub;
+ private:
+  sdf::ElementPtr sdf;
 
-    private: transport::PublisherPtr pitchPub;
-    private: transport::PublisherPtr rollPub;
-    private: transport::PublisherPtr yawPub;
+ private:
+  std::vector<event::ConnectionPtr> connections;
 
-    private: physics::ModelPtr model;
+ private:
+  transport::SubscriberPtr pitchSub;
 
-    /// \brief yaw camera
-    private: physics::JointPtr yawJoint;
+ private:
+  transport::SubscriberPtr rollSub;
 
-    /// \brief camera roll joint
-    private: physics::JointPtr rollJoint;
+ private:
+  transport::SubscriberPtr yawSub;
 
-    /// \brief camera pitch joint
-    private: physics::JointPtr pitchJoint;
+ private:
+  transport::PublisherPtr pitchPub;
 
-    private: sensors::ImuSensorPtr imuSensor;
+ private:
+  transport::PublisherPtr rollPub;
 
-    private: std::string status;
+ private:
+  transport::PublisherPtr yawPub;
 
-    private: double pitchCommand;
-    private: double yawCommand;
-    private: double rollCommand;
+ private:
+  physics::ModelPtr model;
 
-    private: transport::NodePtr node;
+  /// \brief yaw camera
+ private:
+  physics::JointPtr yawJoint;
 
-    private: common::PID pitchPid;
-    private: common::PID rollPid;
-    private: common::PID yawPid;
-    private: common::Time lastUpdateTime;
+  /// \brief camera roll joint
+ private:
+  physics::JointPtr rollJoint;
 
-    private: ignition::ignition::math::Vector3d ThreeAxisRot(
+  /// \brief camera pitch joint
+ private:
+  physics::JointPtr pitchJoint;
+
+ private:
+  sensors::ImuSensorPtr imuSensor;
+
+ private:
+  std::string status;
+
+ private:
+  double pitchCommand;
+
+ private:
+  double yawCommand;
+
+ private:
+  double rollCommand;
+
+ private:
+  transport::NodePtr node;
+
+ private:
+  common::PID pitchPid;
+
+ private:
+  common::PID rollPid;
+
+ private:
+  common::PID yawPid;
+
+ private:
+  common::Time lastUpdateTime;
+
+ private:
+  ignition::ignition::math::Vector3d ThreeAxisRot(
       double r11, double r12, double r21, double r31, double r32);
-    private: ignition::ignition::math::Vector3d QtoZXY(
-      const ignition::math::Quaterniond &_q);
-  };
-}
+
+ private:
+  ignition::ignition::math::Vector3d QtoZXY(
+      const ignition::math::Quaterniond& _q);
+};
+}  // namespace gazebo
 #endif

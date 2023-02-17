@@ -40,8 +40,8 @@ GazeboMavlinkInterface::~GazeboMavlinkInterface() {
   updateConnection_->~Connection();
 }
 
-void GazeboMavlinkInterface::Load(
-    physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+void GazeboMavlinkInterface::Load(physics::ModelPtr _model,
+                                  sdf::ElementPtr _sdf) {
   // Store the pointer to the model.
   model_ = _model;
 
@@ -67,17 +67,19 @@ void GazeboMavlinkInterface::Load(
   node_handle_ = transport::NodePtr(new transport::Node());
   node_handle_->Init();
 
-  getSdfParam<std::string>(
-      _sdf, "motorSpeedCommandPubTopic", motor_velocity_reference_pub_topic_,
-      motor_velocity_reference_pub_topic_);
+  getSdfParam<std::string>(_sdf,
+                           "motorSpeedCommandPubTopic",
+                           motor_velocity_reference_pub_topic_,
+                           motor_velocity_reference_pub_topic_);
   gzdbg << "motorSpeedCommandPubTopic = \""
         << motor_velocity_reference_pub_topic_ << "\"." << std::endl;
   getSdfParam<std::string>(_sdf, "imuSubTopic", imu_sub_topic_, imu_sub_topic_);
   getSdfParam<std::string>(
       _sdf, "lidarSubTopic", lidar_sub_topic_, lidar_sub_topic_);
-  getSdfParam<std::string>(
-      _sdf, "opticalFlowSubTopic", opticalFlow_sub_topic_,
-      opticalFlow_sub_topic_);
+  getSdfParam<std::string>(_sdf,
+                           "opticalFlowSubTopic",
+                           opticalFlow_sub_topic_,
+                           opticalFlow_sub_topic_);
 
   // set input_reference_ from inputs.control
   input_reference_.resize(kNOutMax);
@@ -119,7 +121,7 @@ void GazeboMavlinkInterface::Load(
             else
               gztopic_[index] =
                   "control_position_gztopic_" + std::to_string(index);
-                  
+
             joint_control_pub_[index] =
                 node_handle_->Advertise<gazebo::msgs::Any>(gztopic_[index]);
           }
@@ -143,26 +145,19 @@ void GazeboMavlinkInterface::Load(
           if (channel->HasElement("joint_control_pid")) {
             sdf::ElementPtr pid = channel->GetElement("joint_control_pid");
             double p = 0;
-            if (pid->HasElement("p"))
-              p = pid->Get<double>("p");
+            if (pid->HasElement("p")) p = pid->Get<double>("p");
             double i = 0;
-            if (pid->HasElement("i"))
-              i = pid->Get<double>("i");
+            if (pid->HasElement("i")) i = pid->Get<double>("i");
             double d = 0;
-            if (pid->HasElement("d"))
-              d = pid->Get<double>("d");
+            if (pid->HasElement("d")) d = pid->Get<double>("d");
             double iMax = 0;
-            if (pid->HasElement("iMax"))
-              iMax = pid->Get<double>("iMax");
+            if (pid->HasElement("iMax")) iMax = pid->Get<double>("iMax");
             double iMin = 0;
-            if (pid->HasElement("iMin"))
-              iMin = pid->Get<double>("iMin");
+            if (pid->HasElement("iMin")) iMin = pid->Get<double>("iMin");
             double cmdMax = 0;
-            if (pid->HasElement("cmdMax"))
-              cmdMax = pid->Get<double>("cmdMax");
+            if (pid->HasElement("cmdMax")) cmdMax = pid->Get<double>("cmdMax");
             double cmdMin = 0;
-            if (pid->HasElement("cmdMin"))
-              cmdMin = pid->Get<double>("cmdMin");
+            if (pid->HasElement("cmdMin")) cmdMin = pid->Get<double>("cmdMin");
             pids_[index].Init(p, i, d, iMax, iMin, cmdMax, cmdMin);
           }
         } else {
@@ -182,15 +177,17 @@ void GazeboMavlinkInterface::Load(
       boost::bind(&GazeboMavlinkInterface::OnUpdate, this, _1));
 
   // Subscriber to IMU sensor_msgs::Imu Message and SITL message
-  imu_sub_ = node_handle_->Subscribe(
-      "~/" + model_->GetName() + imu_sub_topic_,
-      &GazeboMavlinkInterface::ImuCallback, this);
-  lidar_sub_ = node_handle_->Subscribe(
-      "~/" + model_->GetName() + lidar_sub_topic_,
-      &GazeboMavlinkInterface::LidarCallback, this);
-  opticalFlow_sub_ = node_handle_->Subscribe(
-      "~/" + model_->GetName() + opticalFlow_sub_topic_,
-      &GazeboMavlinkInterface::OpticalFlowCallback, this);
+  imu_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + imu_sub_topic_,
+                                     &GazeboMavlinkInterface::ImuCallback,
+                                     this);
+  lidar_sub_ =
+      node_handle_->Subscribe("~/" + model_->GetName() + lidar_sub_topic_,
+                              &GazeboMavlinkInterface::LidarCallback,
+                              this);
+  opticalFlow_sub_ =
+      node_handle_->Subscribe("~/" + model_->GetName() + opticalFlow_sub_topic_,
+                              &GazeboMavlinkInterface::OpticalFlowCallback,
+                              this);
 
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ =
@@ -264,8 +261,8 @@ void GazeboMavlinkInterface::Load(
   }
 
   auto worldName = world_->Name();
-  model_param(worldName, model_->GetName(), "mavlink_udp_port",
-  mavlink_udp_port_);
+  model_param(
+      worldName, model_->GetName(), "mavlink_udp_port", mavlink_udp_port_);
 
   qgc_addr_ = htonl(INADDR_ANY);
   if (_sdf->HasElement("qgc_addr")) {
@@ -394,9 +391,12 @@ void GazeboMavlinkInterface::send_mavlink_message(
       dest_addr.sin_port = htons(destination_port);
     }
 
-    ssize_t len = sendto(
-        _fd, buffer, packetlen, 0, (struct sockaddr*)&srcaddr_,
-        sizeof(srcaddr_));
+    ssize_t len = sendto(_fd,
+                         buffer,
+                         packetlen,
+                         0,
+                         (struct sockaddr*)&srcaddr_,
+                         sizeof(srcaddr_));
 
     if (len <= 0) {
       printf("Failed sending mavlink message\n");
@@ -411,9 +411,11 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   ignition::math::Quaterniond q_br(0, 1, 0, 0);
   ignition::math::Quaterniond q_ng(0, 0.70711, 0.70711, 0);
 
-  ignition::math::Quaterniond q_gr = ignition::math::Quaterniond(
-      imu_message->orientation().w(), imu_message->orientation().x(),
-      imu_message->orientation().y(), imu_message->orientation().z());
+  ignition::math::Quaterniond q_gr =
+      ignition::math::Quaterniond(imu_message->orientation().w(),
+                                  imu_message->orientation().x(),
+                                  imu_message->orientation().y(),
+                                  imu_message->orientation().z());
 
   ignition::math::Quaterniond q_gb = q_gr * q_br.Inverse();
   ignition::math::Quaterniond q_nb = q_ng * q_gb;
@@ -435,13 +437,14 @@ void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message) {
   ignition::math::Vector3d mag_noise_b(
       0.01 * randn_(rand_), 0.01 * randn_(rand_), 0.01 * randn_(rand_));
 
-  ignition::math::Vector3d accel_b = q_br.RotateVector(ignition::math::Vector3d(
-      imu_message->linear_acceleration().x(),
-      imu_message->linear_acceleration().y(),
-      imu_message->linear_acceleration().z()));
-  ignition::math::Vector3d gyro_b = q_br.RotateVector(ignition::math::Vector3d(
-      imu_message->angular_velocity().x(), imu_message->angular_velocity().y(),
-      imu_message->angular_velocity().z()));
+  ignition::math::Vector3d accel_b = q_br.RotateVector(
+      ignition::math::Vector3d(imu_message->linear_acceleration().x(),
+                               imu_message->linear_acceleration().y(),
+                               imu_message->linear_acceleration().z()));
+  ignition::math::Vector3d gyro_b = q_br.RotateVector(
+      ignition::math::Vector3d(imu_message->angular_velocity().x(),
+                               imu_message->angular_velocity().y(),
+                               imu_message->angular_velocity().z()));
   ignition::math::Vector3d mag_b =
       q_nb.RotateVectorReverse(mag_n) + mag_noise_b;
 
@@ -604,8 +607,9 @@ void GazeboMavlinkInterface::OpticalFlowCallback(
   sensor_msg.integration_time_us = opticalFlow_message->integration_time_us();
   sensor_msg.integrated_x = opticalFlow_message->integrated_x();
   sensor_msg.integrated_y = opticalFlow_message->integrated_y();
-  sensor_msg.integrated_xgyro =
-      opticalFlow_message->quality() ? -optflow_gyro_.Y() : 0.0f;  // xy switched
+  sensor_msg.integrated_xgyro = opticalFlow_message->quality()
+                                    ? -optflow_gyro_.Y()
+                                    : 0.0f;  // xy switched
   sensor_msg.integrated_ygyro =
       opticalFlow_message->quality() ? optflow_gyro_.X() : 0.0f;  // xy switched
   sensor_msg.integrated_zgyro = opticalFlow_message->quality()
@@ -626,8 +630,8 @@ void GazeboMavlinkInterface::OpticalFlowCallback(
   send_mavlink_message(&msg);
 }
 
-void GazeboMavlinkInterface::pollForMAVLinkMessages(
-    double _dt, uint32_t _timeoutMs) {
+void GazeboMavlinkInterface::pollForMAVLinkMessages(double _dt,
+                                                    uint32_t _timeoutMs) {
   // convert timeout in ms to timeval
   struct timeval tv;
   tv.tv_sec = _timeoutMs / 1000;
@@ -773,28 +777,26 @@ void GazeboMavlinkInterface::open() {
 
 void GazeboMavlinkInterface::close() {
   lock_guard lock(mutex_);
-  if (!is_open())
-    return;
+  if (!is_open()) return;
 
   io_service_.stop();
   serial_dev_.close();
 
-  if (io_thread_.joinable())
-    io_thread_.join();
+  if (io_thread_.joinable()) io_thread_.join();
 }
 
 void GazeboMavlinkInterface::do_read(void) {
   serial_dev_.async_read_some(
       boost::asio::buffer(rx_buf_),
-      boost::bind(
-          &GazeboMavlinkInterface::parse_buffer, this,
-          boost::asio::placeholders::error,
-          boost::asio::placeholders::bytes_transferred));
+      boost::bind(&GazeboMavlinkInterface::parse_buffer,
+                  this,
+                  boost::asio::placeholders::error,
+                  boost::asio::placeholders::bytes_transferred));
 }
 
 // Based on MAVConnInterface::parse_buffer in MAVROS
-void GazeboMavlinkInterface::parse_buffer(
-    const boost::system::error_code& err, std::size_t bytes_t) {
+void GazeboMavlinkInterface::parse_buffer(const boost::system::error_code& err,
+                                          std::size_t bytes_t) {
   mavlink_status_t status;
   mavlink_message_t message;
   uint8_t* buf = this->rx_buf_.data();
@@ -804,8 +806,8 @@ void GazeboMavlinkInterface::parse_buffer(
   for (; bytes_t > 0; bytes_t--) {
     auto c = *buf++;
 
-    auto msg_received = static_cast<Framing>(
-        mavlink_frame_char_buffer(&m_buffer_, &m_status_, c, &message, &status));
+    auto msg_received = static_cast<Framing>(mavlink_frame_char_buffer(
+        &m_buffer_, &m_status_, c, &message, &status));
     if (msg_received == Framing::bad_crc ||
         msg_received == Framing::bad_signature) {
       _mav_parse_error(&m_status_);
@@ -828,20 +830,18 @@ void GazeboMavlinkInterface::parse_buffer(
 }
 
 void GazeboMavlinkInterface::do_write(bool check_tx_state) {
-  if (check_tx_state && tx_in_progress_)
-    return;
+  if (check_tx_state && tx_in_progress_) return;
 
   lock_guard lock(mutex_);
-  if (tx_q_.empty())
-    return;
+  if (tx_q_.empty()) return;
 
   tx_in_progress_ = true;
   auto& buf_ref = tx_q_.front();
 
   serial_dev_.async_write_some(
       boost::asio::buffer(buf_ref.dpos(), buf_ref.nbytes()),
-      [this, &buf_ref](
-          boost::system::error_code error, size_t bytes_transferred) {
+      [this, &buf_ref](boost::system::error_code error,
+                       size_t bytes_transferred) {
         assert(bytes_transferred <= buf_ref.len);
         if (error) {
           gzerr << "Serial error: " << error.message() << "\n";

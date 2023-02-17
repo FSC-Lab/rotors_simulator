@@ -21,17 +21,16 @@
  * Author: Michael Pantic / John Hsu (original Depth Plugin)
  * Date: 03 Dez 18
  */
+#include <assert.h>
 #include <rotors_gazebo_plugins/gazebo_noisydepth_plugin.h>
+#include <tf/tf.h>
 
 #include <algorithm>
-#include <assert.h>
-
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 #include <gazebo/sensors/Sensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <sdf/sdf.hh>
-#include <tf/tf.h>
 
 namespace gazebo {
 // Register this plugin with the simulator
@@ -94,14 +93,14 @@ void GazeboNoisyDepth::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
     this->noise_model.reset(new KinectDepthNoiseModel());
 
     /* no other properties for Kinect */
-  } else if(boost::iequals(noise_model, "PMD")) {
+  } else if (boost::iequals(noise_model, "PMD")) {
     this->noise_model.reset(new PMDDepthNoiseModel());
 
     /* no other properties for PMD */
   }
 
-   else if (boost::iequals(noise_model, "D435")) {
-    D435DepthNoiseModel *model = new D435DepthNoiseModel();
+  else if (boost::iequals(noise_model, "D435")) {
+    D435DepthNoiseModel* model = new D435DepthNoiseModel();
     this->noise_model.reset(model);
 
     if (_sdf->HasElement("horizontal_fov")) {
@@ -123,12 +122,12 @@ void GazeboNoisyDepth::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
     }
 
     ROS_INFO_STREAM_NAMED(
-        "NoisyDepth", "D435 Depth noise configuration: "
-                          << "\tHorizontal FoV: " << model->h_fov << std::endl
-                          << "\tBaseline: " << model->baseline << std::endl
-                          << "\tSubpixel Err: " << model->subpixel_err
-                          << std::endl
-                          << "\tNoise StDev cutoff: " << model->max_stdev);
+        "NoisyDepth",
+        "D435 Depth noise configuration: "
+            << "\tHorizontal FoV: " << model->h_fov << std::endl
+            << "\tBaseline: " << model->baseline << std::endl
+            << "\tSubpixel Err: " << model->subpixel_err << std::endl
+            << "\tNoise StDev cutoff: " << model->max_stdev);
   } else {
     ROS_WARN_NAMED("NoisyDepth",
                    "Invalid depthNoiseModelName (%s), assuming 'Kinect'",
@@ -149,7 +148,8 @@ void GazeboNoisyDepth::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
         _sdf->GetElement("depthNoiseMaxDist")->Get<float>();
   }
 
-  load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboNoisyDepth::Advertise, this));
+  load_connection_ = GazeboRosCameraUtils::OnLoad(
+      boost::bind(&GazeboNoisyDepth::Advertise, this));
 
   GazeboRosCameraUtils::Load(_parent, _sdf);
 }
@@ -157,21 +157,26 @@ void GazeboNoisyDepth::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) {
 void GazeboNoisyDepth::Advertise() {
   ros::AdvertiseOptions depth_image_ao =
       ros::AdvertiseOptions::create<sensor_msgs::Image>(
-          this->depth_image_topic_name_, 1,
+          this->depth_image_topic_name_,
+          1,
           boost::bind(&GazeboNoisyDepth::DepthImageConnect, this),
           boost::bind(&GazeboNoisyDepth::DepthImageDisconnect, this),
-          ros::VoidPtr(), &this->camera_queue_);
+          ros::VoidPtr(),
+          &this->camera_queue_);
 
   this->depth_image_pub_ = this->rosnode_->advertise(depth_image_ao);
 
   ros::AdvertiseOptions depth_image_camera_info_ao =
       ros::AdvertiseOptions::create<sensor_msgs::CameraInfo>(
-          this->depth_image_camera_info_topic_name_, 1,
+          this->depth_image_camera_info_topic_name_,
+          1,
           boost::bind(&GazeboNoisyDepth::DepthInfoConnect, this),
           boost::bind(&GazeboNoisyDepth::DepthInfoDisconnect, this),
-          ros::VoidPtr(), &this->camera_queue_);
+          ros::VoidPtr(),
+          &this->camera_queue_);
 
-  this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
+  this->depth_image_camera_info_pub_ =
+      this->rosnode_->advertise(depth_image_camera_info_ao);
 }
 
 void GazeboNoisyDepth::DepthImageConnect() {
@@ -183,49 +188,50 @@ void GazeboNoisyDepth::DepthImageDisconnect() {
   --this->depth_image_connect_count_;
 }
 
-void GazeboNoisyDepth::DepthInfoConnect() {
-  ++this->depth_info_connect_count_;
-}
+void GazeboNoisyDepth::DepthInfoConnect() { ++this->depth_info_connect_count_; }
 
 void GazeboNoisyDepth::DepthInfoDisconnect() {
   --this->depth_info_connect_count_;
 }
 
-void GazeboNoisyDepth::OnNewDepthFrame(const float *_image, unsigned int _width,
+void GazeboNoisyDepth::OnNewDepthFrame(const float* _image,
+                                       unsigned int _width,
                                        unsigned int _height,
                                        unsigned int _depth,
-                                       const std::string &_format) {
+                                       const std::string& _format) {
   if (!this->initialized_ || this->height_ <= 0 || this->width_ <= 0) return;
 
   this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
 
-  // check if there are subscribers, if not disable parent, else process images..
+  // check if there are subscribers, if not disable parent, else process
+  // images..
   if (this->parentSensor->IsActive()) {
-    if (this->depth_image_connect_count_ <= 0 && (*this->image_connect_count_) <= 0) {
+    if (this->depth_image_connect_count_ <= 0 &&
+        (*this->image_connect_count_) <= 0) {
       this->parentSensor->SetActive(false);
     } else {
       if (this->depth_image_connect_count_ > 0) this->FillDepthImage(_image);
     }
-  }
-  else {
+  } else {
     // if parent is disabled, but has subscribers, enable it.
-    if ((*this->image_connect_count_) > 0){
+    if ((*this->image_connect_count_) > 0) {
       this->parentSensor->SetActive(true);
     }
   }
   PublishCameraInfo();
 }
 
-void GazeboNoisyDepth::OnNewImageFrame(const unsigned char *_image,
+void GazeboNoisyDepth::OnNewImageFrame(const unsigned char* _image,
                                        unsigned int _width,
                                        unsigned int _height,
                                        unsigned int _depth,
-                                       const std::string &_format) {
+                                       const std::string& _format) {
   if (!this->initialized_ || this->height_ <= 0 || this->width_ <= 0) return;
 
   this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
 
-  // check if there are subscribers, if not disable parent, else process images..
+  // check if there are subscribers, if not disable parent, else process
+  // images..
   if (this->parentSensor->IsActive()) {
     if (this->depth_image_connect_count_ <= 0 &&
         (*this->image_connect_count_) <= 0) {
@@ -241,15 +247,20 @@ void GazeboNoisyDepth::OnNewImageFrame(const unsigned char *_image,
   }
 }
 
-void GazeboNoisyDepth::FillDepthImage(const float *_src) {
+void GazeboNoisyDepth::FillDepthImage(const float* _src) {
   this->lock_.lock();
   // copy data into image
   this->depth_image_msg_.header.frame_id = this->frame_name_;
   this->depth_image_msg_.header.stamp.sec = this->depth_sensor_update_time_.sec;
-  this->depth_image_msg_.header.stamp.nsec = this->depth_sensor_update_time_.nsec;
+  this->depth_image_msg_.header.stamp.nsec =
+      this->depth_sensor_update_time_.nsec;
 
   // copy from depth to depth image message
-  if(FillDepthImageHelper(this->height, this->width,this->skip_, _src, &this->depth_image_msg_)){
+  if (FillDepthImageHelper(this->height,
+                           this->width,
+                           this->skip_,
+                           _src,
+                           &this->depth_image_msg_)) {
     this->depth_image_pub_.publish(this->depth_image_msg_);
   }
 
@@ -259,9 +270,9 @@ void GazeboNoisyDepth::FillDepthImage(const float *_src) {
 bool GazeboNoisyDepth::FillDepthImageHelper(const uint32_t rows_arg,
                                             const uint32_t cols_arg,
                                             const uint32_t step_arg,
-                                            const float *data_arg,
-                                            sensor_msgs::Image *image_msg) {
-  if(data_arg == nullptr){
+                                            const float* data_arg,
+                                            sensor_msgs::Image* image_msg) {
+  if (data_arg == nullptr) {
     ROS_WARN_NAMED("NoisyDepth", "Invalid data array received - nullptr.");
     return false;
   }
@@ -273,7 +284,7 @@ bool GazeboNoisyDepth::FillDepthImageHelper(const uint32_t rows_arg,
   image_msg->data.resize(rows_arg * cols_arg * sizeof(float));
   image_msg->is_bigendian = 0;
 
-  float *dest = (float *)(&(image_msg->data[0]));
+  float* dest = (float*)(&(image_msg->data[0]));
   memcpy(dest, data_arg, sizeof(float) * width * height);
 
   noise_model->ApplyNoise(width, height, dest);
@@ -282,7 +293,6 @@ bool GazeboNoisyDepth::FillDepthImageHelper(const uint32_t rows_arg,
 }
 
 void GazeboNoisyDepth::PublishCameraInfo() {
-
   // first publish parent camera info (ir camera)
   GazeboRosCameraUtils::PublishCameraInfo();
 
@@ -295,10 +305,13 @@ void GazeboNoisyDepth::PublishCameraInfo() {
 #endif
 
     if (this->sensor_update_time_ -
-            this->last_depth_image_camera_info_update_time_ >= this->update_period_) {
-      this->GazeboRosCameraUtils::PublishCameraInfo(this->depth_image_camera_info_pub_);
-      this->last_depth_image_camera_info_update_time_ = this->sensor_update_time_;
+            this->last_depth_image_camera_info_update_time_ >=
+        this->update_period_) {
+      this->GazeboRosCameraUtils::PublishCameraInfo(
+          this->depth_image_camera_info_pub_);
+      this->last_depth_image_camera_info_update_time_ =
+          this->sensor_update_time_;
     }
   }
 }
-}
+}  // namespace gazebo

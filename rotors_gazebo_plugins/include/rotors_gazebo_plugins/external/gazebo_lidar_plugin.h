@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 /*
  * Desc: Ray Plugin
  * Author: Nate Koenig mod by John Hsu
@@ -22,46 +22,47 @@
 #ifndef _GAZEBO_RAY_PLUGIN_HH_
 #define _GAZEBO_RAY_PLUGIN_HH_
 
+#include "Lidar.pb.h"
 #include "gazebo/common/Plugin.hh"
-#include "gazebo/sensors/SensorTypes.hh"
 #include "gazebo/sensors/RaySensor.hh"
+#include "gazebo/sensors/SensorTypes.hh"
 #include "gazebo/util/system.hh"
 
-#include "Lidar.pb.h"
+namespace gazebo {
+/// \brief    A Gazebo LIDAR plugin.
+class GAZEBO_VISIBLE GazeboLidarPlugin : public SensorPlugin {
+  /// \brief Constructor
+ public:
+  GazeboLidarPlugin();
 
-namespace gazebo
-{
-  /// \brief    A Gazebo LIDAR plugin.
-  class GAZEBO_VISIBLE GazeboLidarPlugin : public SensorPlugin
-  {
-    /// \brief Constructor
-    public: GazeboLidarPlugin();
+  /// \brief Destructor
+ public:
+  virtual ~GazeboLidarPlugin();
 
-    /// \brief Destructor
-    public: virtual ~GazeboLidarPlugin();
+  /// \brief Update callback
+ public:
+  virtual void OnNewLaserScans();
 
-    /// \brief Update callback
-    public: virtual void OnNewLaserScans();
+  /// \brief Load the plugin
+  /// \param take in SDF root element
+ public:
+  void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
 
-    /// \brief Load the plugin
-    /// \param take in SDF root element
-    public: void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
+  /// \brief Pointer to parent
+ protected:
+  physics::WorldPtr world;
 
-    /// \brief Pointer to parent
-    protected: physics::WorldPtr world;
+  /// \brief The parent sensor
+ private:
+  sensors::RaySensorPtr parentSensor;
+  transport::NodePtr node_handle_;
+  transport::PublisherPtr lidar_pub_;
+  std::string namespace_;
 
-    /// \brief The parent sensor
-    private: 
-      sensors::RaySensorPtr parentSensor;
-      transport::NodePtr node_handle_;
-      transport::PublisherPtr lidar_pub_;
-      std::string namespace_;
-
-
-    /// \brief The connection tied to RayPlugin::OnNewLaserScans()
-    private: 
-      event::ConnectionPtr newLaserScansConnection;
-      lidar_msgs::msgs::lidar lidar_message;
-  };
-}
+  /// \brief The connection tied to RayPlugin::OnNewLaserScans()
+ private:
+  event::ConnectionPtr newLaserScansConnection;
+  lidar_msgs::msgs::lidar lidar_message;
+};
+}  // namespace gazebo
 #endif

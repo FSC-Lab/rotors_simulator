@@ -24,7 +24,7 @@ class DepthNoiseModel {
   DepthNoiseModel()
       : max_depth(1000.0f), min_depth(0.2f), gen(std::random_device{}()) {}
 
-  virtual void ApplyNoise(uint32_t width, uint32_t height, float *data) = 0;
+  virtual void ApplyNoise(uint32_t width, uint32_t height, float* data) = 0;
 
   float max_depth;  // [m]
   float min_depth;  // [m] Values smaller/larger than these two are replaced
@@ -42,16 +42,15 @@ class KinectDepthNoiseModel : public DepthNoiseModel {
  public:
   KinectDepthNoiseModel() : DepthNoiseModel() {}
 
-  void ApplyNoise(uint32_t width, uint32_t height, float *data);
+  void ApplyNoise(uint32_t width, uint32_t height, float* data);
 };
 
 class PMDDepthNoiseModel : public DepthNoiseModel {
  public:
   PMDDepthNoiseModel() : DepthNoiseModel() {}
 
-  void ApplyNoise(uint32_t width, uint32_t height, float *data);
+  void ApplyNoise(uint32_t width, uint32_t height, float* data);
 };
-
 
 class D435DepthNoiseModel : public DepthNoiseModel {
  public:
@@ -62,15 +61,15 @@ class D435DepthNoiseModel : public DepthNoiseModel {
         max_stdev(3.0f),
         DepthNoiseModel() {}
 
-  void ApplyNoise(uint32_t width, uint32_t height, float *data);
+  void ApplyNoise(uint32_t width, uint32_t height, float* data);
 
   // public params...
   float h_fov;         // [rad]
   float baseline;      // [m]
   float subpixel_err;  // [pixel] Calibration error
   float max_stdev;     // [m] cutoff for distance standard deviation:
-                       //     If modeled standard deviation becomes bigger, it is replaced with this
-                       //     value.
+                    //     If modeled standard deviation becomes bigger, it is
+                    //     replaced with this value.
 };
 
 #endif  // ROTORS_GAZEBO_PLUGINS_DEPTH_NOISE_MODEL_H

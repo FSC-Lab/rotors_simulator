@@ -17,9 +17,9 @@
 #ifndef ROTORS_HIL_INTERFACE_NODE_H_
 #define ROTORS_HIL_INTERFACE_NODE_H_
 
-#include <memory>
-
 #include <rotors_hil_interface/hil_interface.h>
+
+#include <memory>
 
 namespace rotors_hil {
 // Default values
@@ -29,7 +29,8 @@ static constexpr double kDefaultBodyToSensorsRoll = M_PI;
 static constexpr double kDefaultBodyToSensorsPitch = 0.0;
 static constexpr double kDefaultBodyToSensorsYaw = 0.0;
 static const std::string kDefaultMavlinkPubTopic = "mavlink/to";
-static const std::string kDefaultHilControlsSubTopic = "mavros/hil_controls/hil_controls";
+static const std::string kDefaultHilControlsSubTopic =
+    "mavros/hil_controls/hil_controls";
 
 class HilInterfaceNode {
  public:
@@ -41,7 +42,8 @@ class HilInterfaceNode {
 
   /// \brief Callback for handling HilControls messages.
   /// \param[in] hil_controls_msg A HilControls message.
-  void HilControlsCallback(const mavros_msgs::HilControlsConstPtr& hil_controls_msg);
+  void HilControlsCallback(
+      const mavros_msgs::HilControlsConstPtr& hil_controls_msg);
 
  private:
   /// ROS node handle.
@@ -62,6 +64,6 @@ class HilInterfaceNode {
   /// Pointer to the HIL interface object.
   std::unique_ptr<HilInterface> hil_interface_;
 };
-}
+}  // namespace rotors_hil
 
-#endif // ROTORS_HIL_INTERFACE_NODE_H_
+#endif  // ROTORS_HIL_INTERFACE_NODE_H_

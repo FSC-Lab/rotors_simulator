@@ -23,40 +23,48 @@
 namespace rotors_control {
 
 RollPitchYawrateThrustController::RollPitchYawrateThrustController()
-    : initialized_params_(false),
-      controller_active_(false) {
+    : initialized_params_(false), controller_active_(false) {
   InitializeParameters();
 }
 
 RollPitchYawrateThrustController::~RollPitchYawrateThrustController() {}
 
 void RollPitchYawrateThrustController::InitializeParameters() {
-  calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_, &(controller_parameters_.allocation_matrix_));
+  calculateAllocationMatrix(vehicle_parameters_.rotor_configuration_,
+                            &(controller_parameters_.allocation_matrix_));
   // To make the tuning independent of the inertia matrix we divide here.
-  normalized_attitude_gain_ = controller_parameters_.attitude_gain_.transpose()
-      * vehicle_parameters_.inertia_.inverse();
+  normalized_attitude_gain_ =
+      controller_parameters_.attitude_gain_.transpose() *
+      vehicle_parameters_.inertia_.inverse();
   // To make the tuning independent of the inertia matrix we divide here.
-  normalized_angular_rate_gain_ = controller_parameters_.angular_rate_gain_.transpose()
-      * vehicle_parameters_.inertia_.inverse();
+  normalized_angular_rate_gain_ =
+      controller_parameters_.angular_rate_gain_.transpose() *
+      vehicle_parameters_.inertia_.inverse();
 
   Eigen::Matrix4d I;
   I.setZero();
   I.block<3, 3>(0, 0) = vehicle_parameters_.inertia_;
   I(3, 3) = 1;
-  angular_acc_to_rotor_velocities_.resize(vehicle_parameters_.rotor_configuration_.rotors.size(), 4);
-  // Calculate the pseude-inverse A^{ \dagger} and then multiply by the inertia matrix I.
-  // A^{ \dagger} = A^T*(A*A^T)^{-1}
-  angular_acc_to_rotor_velocities_ = controller_parameters_.allocation_matrix_.transpose()
-      * (controller_parameters_.allocation_matrix_
-      * controller_parameters_.allocation_matrix_.transpose()).inverse() * I;
+  angular_acc_to_rotor_velocities_.resize(
+      vehicle_parameters_.rotor_configuration_.rotors.size(), 4);
+  // Calculate the pseude-inverse A^{ \dagger} and then multiply by the inertia
+  // matrix I. A^{ \dagger} = A^T*(A*A^T)^{-1}
+  angular_acc_to_rotor_velocities_ =
+      controller_parameters_.allocation_matrix_.transpose() *
+      (controller_parameters_.allocation_matrix_ *
+       controller_parameters_.allocation_matrix_.transpose())
+          .inverse() *
+      I;
   initialized_params_ = true;
 }
 
-void RollPitchYawrateThrustController::CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const {
+void RollPitchYawrateThrustController::CalculateRotorVelocities(
+    Eigen::VectorXd* rotor_velocities) const {
   assert(rotor_velocities);
   assert(initialized_params_);
 
-  rotor_velocities->resize(vehicle_parameters_.rotor_configuration_.rotors.size());
+  rotor_velocities->resize(
+      vehicle_parameters_.rotor_configuration_.rotors.size());
   // Return 0 velocities on all rotors, until the first command is received.
   if (!controller_active_) {
     *rotor_velocities = Eigen::VectorXd::Zero(rotor_velocities->rows());
@@ -70,12 +78,15 @@ void RollPitchYawrateThrustController::CalculateRotorVelocities(Eigen::VectorXd*
   angular_acceleration_thrust.block<3, 1>(0, 0) = angular_acceleration;
   angular_acceleration_thrust(3) = roll_pitch_yawrate_thrust_.thrust.z();
 
-  *rotor_velocities = angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
-  *rotor_velocities = rotor_velocities->cwiseMax(Eigen::VectorXd::Zero(rotor_velocities->rows()));
+  *rotor_velocities =
+      angular_acc_to_rotor_velocities_ * angular_acceleration_thrust;
+  *rotor_velocities = rotor_velocities->cwiseMax(
+      Eigen::VectorXd::Zero(rotor_velocities->rows()));
   *rotor_velocities = rotor_velocities->cwiseSqrt();
 }
 
-void RollPitchYawrateThrustController::SetOdometry(const EigenOdometry& odometry) {
+void RollPitchYawrateThrustController::SetOdometry(
+    const EigenOdometry& odometry) {
   odometry_ = odometry;
 }
 
@@ -86,8 +97,10 @@ void RollPitchYawrateThrustController::SetRollPitchYawrateThrust(
 }
 
 // Implementation from the T. Lee et al. paper
-// Control of complex maneuvers for a quadrotor UAV using geometric methods on SE(3)
-void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const {
+// Control of complex maneuvers for a quadrotor UAV using geometric methods on
+// SE(3)
+void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(
+    Eigen::Vector3d* angular_acceleration) const {
   assert(angular_acceleration);
 
   Eigen::Matrix3d R = odometry_.orientation.toRotationMatrix();
@@ -96,11 +109,14 @@ void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(Eigen::Vector3d*
   // Get the desired rotation matrix.
   Eigen::Matrix3d R_des;
   R_des = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())  // yaw
-        * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll, Eigen::Vector3d::UnitX())  // roll
-        * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch, Eigen::Vector3d::UnitY());  // pitch
+          * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.roll,
+                              Eigen::Vector3d::UnitX())  // roll
+          * Eigen::AngleAxisd(roll_pitch_yawrate_thrust_.pitch,
+                              Eigen::Vector3d::UnitY());  // pitch
 
   // Angle error according to lee et al.
-  Eigen::Matrix3d angle_error_matrix = 0.5 * (R_des.transpose() * R - R.transpose() * R_des);
+  Eigen::Matrix3d angle_error_matrix =
+      0.5 * (R_des.transpose() * R - R.transpose() * R_des);
   Eigen::Vector3d angle_error;
   vectorFromSkewMatrix(angle_error_matrix, &angle_error);
 
@@ -108,10 +124,13 @@ void RollPitchYawrateThrustController::ComputeDesiredAngularAcc(Eigen::Vector3d*
   Eigen::Vector3d angular_rate_des(Eigen::Vector3d::Zero());
   angular_rate_des[2] = roll_pitch_yawrate_thrust_.yaw_rate;
 
-  Eigen::Vector3d angular_rate_error = odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
+  Eigen::Vector3d angular_rate_error =
+      odometry_.angular_velocity - R_des.transpose() * R * angular_rate_des;
 
-  *angular_acceleration = -1 * angle_error.cwiseProduct(normalized_attitude_gain_)
-                           - angular_rate_error.cwiseProduct(normalized_angular_rate_gain_)
-                           + odometry_.angular_velocity.cross(odometry_.angular_velocity); // we don't need the inertia matrix here
+  *angular_acceleration =
+      -1 * angle_error.cwiseProduct(normalized_attitude_gain_) -
+      angular_rate_error.cwiseProduct(normalized_angular_rate_gain_) +
+      odometry_.angular_velocity.cross(
+          odometry_.angular_velocity);  // we don't need the inertia matrix here
 }
-}
+}  // namespace rotors_control

@@ -32,15 +32,14 @@ GazeboGpsPlugin::GazeboGpsPlugin()
       random_generator_(random_device_()),
       pubs_and_subs_created_(false) {}
 
-GazeboGpsPlugin::~GazeboGpsPlugin() {
-}
+GazeboGpsPlugin::~GazeboGpsPlugin() {}
 
 void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   if (kPrintOnPluginLoad) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
 
-// Store the pointer to the parent sensor.
+  // Store the pointer to the parent sensor.
   parent_sensor_ = std::dynamic_pointer_cast<sensors::GpsSensor>(_sensor);
   world_ = physics::get_world(parent_sensor_->WorldName());
 
@@ -68,8 +67,8 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   std::string frame_id = link_name;
 
   // Get the pointer to the link that holds the sensor.
-  link_ =
-      boost::dynamic_pointer_cast<physics::Link>(world_->EntityByName(link_name));
+  link_ = boost::dynamic_pointer_cast<physics::Link>(
+      world_->EntityByName(link_name));
   if (link_ == NULL)
     gzerr << "[gazebo_gps_plugin] Couldn't find specified link \"" << link_name
           << "\"\n";
@@ -80,20 +79,22 @@ void GazeboGpsPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) {
   double hor_vel_std_dev;
   double ver_vel_std_dev;
 
-  getSdfParam<std::string>(_sdf, "gpsTopic", gps_topic_,
-                           mav_msgs::default_topics::GPS);
+  getSdfParam<std::string>(
+      _sdf, "gpsTopic", gps_topic_, mav_msgs::default_topics::GPS);
 
-  getSdfParam<std::string>(_sdf, "groundSpeedTopic", ground_speed_topic_,
+  getSdfParam<std::string>(_sdf,
+                           "groundSpeedTopic",
+                           ground_speed_topic_,
                            mav_msgs::default_topics::GROUND_SPEED);
 
-  getSdfParam<double>(_sdf, "horPosStdDev", hor_pos_std_dev,
-                      kDefaultHorPosStdDev);
-  getSdfParam<double>(_sdf, "verPosStdDev", ver_pos_std_dev,
-                      kDefaultVerPosStdDev);
-  getSdfParam<double>(_sdf, "horVelStdDev", hor_vel_std_dev,
-                      kDefaultHorVelStdDev);
-  getSdfParam<double>(_sdf, "verVelStdDev", ver_vel_std_dev,
-                      kDefaultVerVelStdDev);
+  getSdfParam<double>(
+      _sdf, "horPosStdDev", hor_pos_std_dev, kDefaultHorPosStdDev);
+  getSdfParam<double>(
+      _sdf, "verPosStdDev", ver_pos_std_dev, kDefaultVerPosStdDev);
+  getSdfParam<double>(
+      _sdf, "horVelStdDev", hor_vel_std_dev, kDefaultHorVelStdDev);
+  getSdfParam<double>(
+      _sdf, "verVelStdDev", ver_vel_std_dev, kDefaultVerVelStdDev);
 
   // Connect to the sensor update event.
   this->updateConnection_ = this->parent_sensor_->ConnectUpdated(
@@ -169,9 +170,10 @@ void GazeboGpsPlugin::OnUpdate() {
   ignition::math::Vector3d W_ground_speed_W_L = link_->WorldLinearVel();
 
   // Apply noise to ground speed.
-  W_ground_speed_W_L += ignition::math::Vector3d (ground_speed_n_[0](random_generator_),
-                                      ground_speed_n_[1](random_generator_),
-                                      ground_speed_n_[2](random_generator_));
+  W_ground_speed_W_L +=
+      ignition::math::Vector3d(ground_speed_n_[0](random_generator_),
+                               ground_speed_n_[1](random_generator_),
+                               ground_speed_n_[2](random_generator_));
 
   // Fill the GPS message.
   current_time = parent_sensor_->LastMeasurementTime();
@@ -242,4 +244,4 @@ void GazeboGpsPlugin::CreatePubsAndSubs() {
 }
 
 GZ_REGISTER_SENSOR_PLUGIN(GazeboGpsPlugin);
-}
+}  // namespace gazebo

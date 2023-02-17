@@ -29,8 +29,10 @@ struct Rotor {
         rotor_force_constant(kDefaultRotorForceConstant),
         rotor_moment_constant(kDefaultRotorMomentConstant),
         direction(1) {}
-  Rotor(double _angle, double _arm_length,
-        double _rotor_force_constant, double _rotor_moment_constant,
+  Rotor(double _angle,
+        double _arm_length,
+        double _rotor_force_constant,
+        double _rotor_moment_constant,
         int _direction)
       : angle(_angle),
         arm_length(_arm_length),
@@ -47,24 +49,36 @@ struct Rotor {
 struct RotorConfiguration {
   RotorConfiguration() {
     // Rotor configuration of Asctec Firefly.
-    rotors.push_back(
-      Rotor(kDefaultRotor0Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, 1));
-    rotors.push_back(
-      Rotor(kDefaultRotor1Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, -1));
-    rotors.push_back(
-      Rotor(kDefaultRotor2Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, 1));
-    rotors.push_back(
-      Rotor(kDefaultRotor3Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, -1));
-    rotors.push_back(
-      Rotor(kDefaultRotor4Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, 1));
-    rotors.push_back(
-      Rotor(kDefaultRotor5Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, -1));
+    rotors.push_back(Rotor(kDefaultRotor0Angle,
+                           kDefaultArmLength,
+                           kDefaultRotorForceConstant,
+                           kDefaultRotorMomentConstant,
+                           1));
+    rotors.push_back(Rotor(kDefaultRotor1Angle,
+                           kDefaultArmLength,
+                           kDefaultRotorForceConstant,
+                           kDefaultRotorMomentConstant,
+                           -1));
+    rotors.push_back(Rotor(kDefaultRotor2Angle,
+                           kDefaultArmLength,
+                           kDefaultRotorForceConstant,
+                           kDefaultRotorMomentConstant,
+                           1));
+    rotors.push_back(Rotor(kDefaultRotor3Angle,
+                           kDefaultArmLength,
+                           kDefaultRotorForceConstant,
+                           kDefaultRotorMomentConstant,
+                           -1));
+    rotors.push_back(Rotor(kDefaultRotor4Angle,
+                           kDefaultArmLength,
+                           kDefaultRotorForceConstant,
+                           kDefaultRotorMomentConstant,
+                           1));
+    rotors.push_back(Rotor(kDefaultRotor5Angle,
+                           kDefaultArmLength,
+                           kDefaultRotorForceConstant,
+                           kDefaultRotorMomentConstant,
+                           -1));
   }
   std::vector<Rotor> rotors;
 };
@@ -75,14 +89,15 @@ class VehicleParameters {
   VehicleParameters()
       : mass_(kDefaultMass),
         gravity_(kDefaultGravity),
-        inertia_(Eigen::Vector3d(kDefaultInertiaXx, kDefaultInertiaYy,
-                                 kDefaultInertiaZz).asDiagonal()) {}
+        inertia_(Eigen::Vector3d(
+                     kDefaultInertiaXx, kDefaultInertiaYy, kDefaultInertiaZz)
+                     .asDiagonal()) {}
   double mass_;
   const double gravity_;
   Eigen::Matrix3d inertia_;
   RotorConfiguration rotor_configuration_;
 };
 
-}
+}  // namespace rotors_control
 
 #endif /* INCLUDE_ROTORS_CONTROL_PARAMETERS_H_ */

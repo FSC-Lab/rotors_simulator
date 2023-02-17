@@ -17,8 +17,9 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_FW_PARAMETERS_H_
 #define ROTORS_GAZEBO_PLUGINS_FW_PARAMETERS_H_
 
-#include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
+
+#include <Eigen/Dense>
 
 namespace gazebo {
 
@@ -116,7 +117,7 @@ inline void YAMLReadParam(const YAML::Node& node,
 
 /// \brief  Macros to reduce copies of names.
 #define READ_CONTROL_SURFACE(node, item) \
-    YAMLReadControlSurface(node, #item, item);
+  YAMLReadControlSurface(node, #item, item);
 #define READ_EIGEN_VECTOR(node, item) YAMLReadEigenVector(node, #item, item);
 #define READ_PARAM(node, item) YAMLReadParam(node, #item, item);
 
@@ -300,6 +301,6 @@ inline void YAMLReadParam(const YAML::Node& node,
   value = node[name].as<T>();
 }
 
-}
+}  // namespace gazebo
 
 #endif /* ROTORS_GAZEBO_PLUGINS_FW_PARAMETERS_H_ */

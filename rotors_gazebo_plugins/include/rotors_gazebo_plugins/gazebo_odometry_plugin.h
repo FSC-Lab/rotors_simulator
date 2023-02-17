@@ -19,30 +19,26 @@
  * limitations under the License.
  */
 
-
 #ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_ODOMETRY_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_GAZEBO_ODOMETRY_PLUGIN_H
 
-#include <cmath>
-#include <deque>
-#include <random>
+#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
 #include <stdio.h>
 
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
-#include <gazebo/common/common.hh>
+#include <cmath>
+#include <deque>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <opencv2/core/core.hpp>
-
-#include <mav_msgs/default_topics.h>  // This comes from the mav_comm repo
-
-#include "rotors_gazebo_plugins/common.h"
-#include "rotors_gazebo_plugins/sdf_api_wrapper.hpp"
+#include <random>
 
 #include "Odometry.pb.h"
-
+#include "rotors_gazebo_plugins/common.h"
+#include "rotors_gazebo_plugins/sdf_api_wrapper.hpp"
 
 namespace gazebo {
 
@@ -62,7 +58,7 @@ class GazeboOdometryPlugin : public ModelPlugin {
  public:
   typedef std::normal_distribution<> NormalDistribution;
   typedef std::uniform_real_distribution<> UniformDistribution;
-  typedef std::deque<std::pair<int, gz_geometry_msgs::Odometry> > OdometryQueue;
+  typedef std::deque<std::pair<int, gz_geometry_msgs::Odometry>> OdometryQueue;
   typedef boost::array<double, 36> CovarianceMatrix;
 
   GazeboOdometryPlugin()
@@ -70,7 +66,8 @@ class GazeboOdometryPlugin : public ModelPlugin {
         random_generator_(random_device_()),
         // DEFAULT TOPICS
         pose_pub_topic_(mav_msgs::default_topics::POSE),
-        pose_with_covariance_stamped_pub_topic_(mav_msgs::default_topics::POSE_WITH_COVARIANCE),
+        pose_with_covariance_stamped_pub_topic_(
+            mav_msgs::default_topics::POSE_WITH_COVARIANCE),
         position_stamped_pub_topic_(mav_msgs::default_topics::POSITION),
         transform_stamped_pub_topic_(mav_msgs::default_topics::TRANSFORM),
         odometry_pub_topic_(mav_msgs::default_topics::ODOMETRY),
@@ -96,15 +93,18 @@ class GazeboOdometryPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo& /*_info*/);
 
  private:
-
-  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
-  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called,
+  /// used
+  ///           to prevent CreatePubsAndSubs() from be called on every
+  ///           OnUpdate().
   bool pubs_and_subs_created_;
 
-  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
-  /// \details  Call this once the first time OnUpdate() is called (can't
-  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
-  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  /// \brief    Creates all required publishers and subscribers, incl. routing
+  /// of messages to/from ROS if required. \details  Call this once the first
+  /// time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee
+  ///           GazeboRosInterfacePlugin has has loaded and listening to
+  ///           ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
 
   OdometryQueue odometry_queue_;
@@ -168,6 +168,6 @@ class GazeboOdometryPlugin : public ModelPlugin {
   void QueueThread();
 };
 
-} // namespace gazebo
+}  // namespace gazebo
 
-#endif // ROTORS_GAZEBO_PLUGINS_GAZEBO_ODOMETRY_PLUGIN_H
+#endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_ODOMETRY_PLUGIN_H

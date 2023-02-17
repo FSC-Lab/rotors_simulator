@@ -17,15 +17,13 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_MAGNETOMETER_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_MAGNETOMETER_PLUGIN_H
 
-#include <random>
-
-#include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <random>
 
 #include "MagneticField.pb.h"
-
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/sdf_api_wrapper.hpp"
 
@@ -39,7 +37,6 @@ static constexpr double kDefaultRefMagEast = 0.000000815;
 static constexpr double kDefaultRefMagDown = 0.000042795;
 
 class GazeboMagnetometerPlugin : public ModelPlugin {
-
  public:
   typedef std::normal_distribution<> NormalDistribution;
   typedef std::uniform_real_distribution<> UniformDistribution;
@@ -52,15 +49,18 @@ class GazeboMagnetometerPlugin : public ModelPlugin {
   void OnUpdate(const common::UpdateInfo&);
 
  private:
-
-  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
-  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called,
+  /// used
+  ///           to prevent CreatePubsAndSubs() from be called on every
+  ///           OnUpdate().
   bool pubs_and_subs_created_;
 
-  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
-  /// \details  Call this once the first time OnUpdate() is called (can't
-  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
-  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  /// \brief    Creates all required publishers and subscribers, incl. routing
+  /// of messages to/from ROS if required. \details  Call this once the first
+  /// time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee
+  ///           GazeboRosInterfacePlugin has has loaded and listening to
+  ///           ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
 
   std::string namespace_;
@@ -94,6 +94,6 @@ class GazeboMagnetometerPlugin : public ModelPlugin {
   std::mt19937 random_generator_;
 };
 
-} // namespace gazebo
+}  // namespace gazebo
 
-#endif // ROTORS_GAZEBO_PLUGINS_MAGNETOMETER_PLUGIN_H
+#endif  // ROTORS_GAZEBO_PLUGINS_MAGNETOMETER_PLUGIN_H

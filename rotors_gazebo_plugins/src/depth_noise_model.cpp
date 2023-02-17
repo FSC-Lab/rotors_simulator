@@ -15,7 +15,6 @@
  */
 #include <algorithm>
 #include <iostream>
-
 #include <rotors_gazebo_plugins/depth_noise_model.hpp>
 
 inline bool DepthNoiseModel::InRange(const float depth) const {
@@ -23,7 +22,8 @@ inline bool DepthNoiseModel::InRange(const float depth) const {
 }
 
 void D435DepthNoiseModel::ApplyNoise(const uint32_t width,
-                                     const uint32_t height, float *data) {
+                                     const uint32_t height,
+                                     float* data) {
   if (data == nullptr) {
     return;
   }
@@ -33,12 +33,14 @@ void D435DepthNoiseModel::ApplyNoise(const uint32_t width,
   Eigen::Map<Eigen::VectorXf> data_vector_map(data, width * height);
 
   // Formula taken from the Intel Whitepaper:
-  // "Best-Known-Methods for Tuning Intel RealSense™ D400 Depth Cameras for Best Performance".
-  // We are using the theoretical RMS model formula.
-  Eigen::VectorXf rms_noise = (data_vector_map * 1000.0).array().square() * multiplier;
+  // "Best-Known-Methods for Tuning Intel RealSense™ D400 Depth Cameras for Best
+  // Performance". We are using the theoretical RMS model formula.
+  Eigen::VectorXf rms_noise =
+      (data_vector_map * 1000.0).array().square() * multiplier;
   Eigen::VectorXf noise = rms_noise.array().square();
 
-  // Sample noise for each pixel and transform variance according to error at this depth.
+  // Sample noise for each pixel and transform variance according to error at
+  // this depth.
   for (int i = 0; i < width * height; ++i) {
     if (InRange(data_vector_map[i])) {
       data_vector_map[i] +=
@@ -50,19 +52,23 @@ void D435DepthNoiseModel::ApplyNoise(const uint32_t width,
 }
 
 void KinectDepthNoiseModel::ApplyNoise(const uint32_t width,
-                                       const uint32_t height, float *data) {
+                                       const uint32_t height,
+                                       float* data) {
   if (data == nullptr) {
     return;
   }
 
   // Axial noise model from
   // https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=6375037,
-  // Nguyen, Izadi & Lovell: "Modeling Kinect Sensor Noise for Improved 3D Reconstrucion and Tracking", 3DIM/3DPVT, 2012.
-  // We are using the 10-60 Degree model as an approximation.
+  // Nguyen, Izadi & Lovell: "Modeling Kinect Sensor Noise for Improved 3D
+  // Reconstrucion and Tracking", 3DIM/3DPVT, 2012. We are using the 10-60
+  // Degree model as an approximation.
   Eigen::Map<Eigen::VectorXf> data_vector_map(data, width * height);
-  Eigen::VectorXf var_noise = 0.0012f + 0.0019f * (data_vector_map.array() - 0.4f).array().square();
+  Eigen::VectorXf var_noise =
+      0.0012f + 0.0019f * (data_vector_map.array() - 0.4f).array().square();
 
-  // Sample noise for each pixel and transform variance according to error at this depth.
+  // Sample noise for each pixel and transform variance according to error at
+  // this depth.
   for (int i = 0; i < width * height; ++i) {
     if (InRange(data_vector_map[i])) {
       data_vector_map[i] += this->dist(this->gen) * var_noise(i);
@@ -72,19 +78,19 @@ void KinectDepthNoiseModel::ApplyNoise(const uint32_t width,
   }
 }
 
-
-
 void PMDDepthNoiseModel::ApplyNoise(const uint32_t width,
-                                       const uint32_t height, float *data) {
+                                    const uint32_t height,
+                                    float* data) {
   if (data == nullptr) {
     return;
   }
 
   // 1% error claimed by PMD
   Eigen::Map<Eigen::VectorXf> data_vector_map(data, width * height);
-  Eigen::VectorXf var_noise =  data_vector_map.array() * 0.01;
+  Eigen::VectorXf var_noise = data_vector_map.array() * 0.01;
 
-  // Sample noise for each pixel and transform variance according to error at this depth.
+  // Sample noise for each pixel and transform variance according to error at
+  // this depth.
   for (int i = 0; i < width * height; ++i) {
     if (InRange(data_vector_map[i])) {
       data_vector_map[i] += this->dist(this->gen) * var_noise(i);

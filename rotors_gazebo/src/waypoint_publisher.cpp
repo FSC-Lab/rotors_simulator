@@ -18,21 +18,21 @@
  * limitations under the License.
  */
 
-#include <fstream>
-#include <iostream>
-
-#include <Eigen/Core>
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/default_topics.h>
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
+
+#include <Eigen/Core>
+#include <fstream>
+#include <iostream>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "waypoint_publisher");
   ros::NodeHandle nh;
   ros::Publisher trajectory_pub =
       nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>(
-      mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
+          mav_msgs::default_topics::COMMAND_TRAJECTORY, 10);
 
   ROS_INFO("Started waypoint_publisher.");
 
@@ -55,13 +55,13 @@ int main(int argc, char** argv) {
   trajectory_msgs::MultiDOFJointTrajectory trajectory_msg;
   trajectory_msg.header.stamp = ros::Time::now();
 
-  Eigen::Vector3d desired_position(std::stof(args.at(1)), std::stof(args.at(2)),
-                                   std::stof(args.at(3)));
+  Eigen::Vector3d desired_position(
+      std::stof(args.at(1)), std::stof(args.at(2)), std::stof(args.at(3)));
 
   double desired_yaw = std::stof(args.at(4)) * DEG_2_RAD;
 
-  mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(desired_position,
-      desired_yaw, &trajectory_msg);
+  mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(
+      desired_position, desired_yaw, &trajectory_msg);
 
   // Wait for some time to create the ros publisher.
   ros::Duration(delay).sleep();

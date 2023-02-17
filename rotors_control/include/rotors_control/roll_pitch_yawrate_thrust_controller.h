@@ -29,9 +29,12 @@
 
 namespace rotors_control {
 
-// Default values for the roll pitch yawrate thrust controller and the Asctec Firefly.
-static const Eigen::Vector3d kDefaultAttitudeGain = Eigen::Vector3d(3, 3, 0.035);
-static const Eigen::Vector3d kDefaultAngularRateGain = Eigen::Vector3d(0.52, 0.52, 0.025);
+// Default values for the roll pitch yawrate thrust controller and the Asctec
+// Firefly.
+static const Eigen::Vector3d kDefaultAttitudeGain =
+    Eigen::Vector3d(3, 3, 0.035);
+static const Eigen::Vector3d kDefaultAngularRateGain =
+    Eigen::Vector3d(0.52, 0.52, 0.025);
 
 class RollPitchYawrateThrustControllerParameters {
  public:
@@ -76,6 +79,6 @@ class RollPitchYawrateThrustController {
 
   void ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const;
 };
-}
+}  // namespace rotors_control
 
-#endif // ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_H
+#endif  // ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_H

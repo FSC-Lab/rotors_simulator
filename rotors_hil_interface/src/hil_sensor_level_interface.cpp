@@ -18,7 +18,8 @@
 
 namespace rotors_hil {
 
-HilSensorLevelInterface::HilSensorLevelInterface(const Eigen::Quaterniond& q_S_B) {
+HilSensorLevelInterface::HilSensorLevelInterface(
+    const Eigen::Quaterniond& q_S_B) {
   ros::NodeHandle pnh("~");
 
   // Retrieve the necessary parameters.
@@ -31,11 +32,19 @@ HilSensorLevelInterface::HilSensorLevelInterface(const Eigen::Quaterniond& q_S_B
   std::string pressure_sub_topic;
 
   pnh.param("gps_frequency", gps_freq, kDefaultGpsFrequency);
-  pnh.param("air_speed_topic", air_speed_sub_topic, std::string(mav_msgs::default_topics::AIR_SPEED));
-  pnh.param("gps_topic", gps_sub_topic, std::string(mav_msgs::default_topics::GPS));
-  pnh.param("ground_speed_topic", ground_speed_sub_topic, std::string(mav_msgs::default_topics::GROUND_SPEED));
-  pnh.param("imu_topic", imu_sub_topic, std::string(mav_msgs::default_topics::IMU));
-  pnh.param("mag_topic", mag_sub_topic, std::string(mav_msgs::default_topics::MAGNETIC_FIELD));
+  pnh.param("air_speed_topic",
+            air_speed_sub_topic,
+            std::string(mav_msgs::default_topics::AIR_SPEED));
+  pnh.param(
+      "gps_topic", gps_sub_topic, std::string(mav_msgs::default_topics::GPS));
+  pnh.param("ground_speed_topic",
+            ground_speed_sub_topic,
+            std::string(mav_msgs::default_topics::GROUND_SPEED));
+  pnh.param(
+      "imu_topic", imu_sub_topic, std::string(mav_msgs::default_topics::IMU));
+  pnh.param("mag_topic",
+            mag_sub_topic,
+            std::string(mav_msgs::default_topics::MAGNETIC_FIELD));
   pnh.param("pressure_topic", pressure_sub_topic, kDefaultPressureSubTopic);
 
   // Compute the desired interval between published GPS messages.
@@ -46,39 +55,41 @@ HilSensorLevelInterface::HilSensorLevelInterface(const Eigen::Quaterniond& q_S_B
   R_S_B_ = q_S_B_.matrix().cast<float>();
 
   // Initialize the subscribers.
-  air_speed_sub_ =
-      nh_.subscribe<geometry_msgs::TwistStamped>(
-          air_speed_sub_topic, 1, boost::bind(
-              &HilListeners::AirSpeedCallback, &hil_listeners_, _1, &hil_data_));
+  air_speed_sub_ = nh_.subscribe<geometry_msgs::TwistStamped>(
+      air_speed_sub_topic,
+      1,
+      boost::bind(
+          &HilListeners::AirSpeedCallback, &hil_listeners_, _1, &hil_data_));
 
-  gps_sub_ =
-      nh_.subscribe<sensor_msgs::NavSatFix>(
-          gps_sub_topic, 1, boost::bind(
-              &HilListeners::GpsCallback, &hil_listeners_, _1, &hil_data_));
+  gps_sub_ = nh_.subscribe<sensor_msgs::NavSatFix>(
+      gps_sub_topic,
+      1,
+      boost::bind(&HilListeners::GpsCallback, &hil_listeners_, _1, &hil_data_));
 
-  ground_speed_sub_ =
-      nh_.subscribe<geometry_msgs::TwistStamped>(
-          ground_speed_sub_topic, 1, boost::bind(
-              &HilListeners::GroundSpeedCallback, &hil_listeners_, _1, &hil_data_));
+  ground_speed_sub_ = nh_.subscribe<geometry_msgs::TwistStamped>(
+      ground_speed_sub_topic,
+      1,
+      boost::bind(
+          &HilListeners::GroundSpeedCallback, &hil_listeners_, _1, &hil_data_));
 
-  imu_sub_ =
-      nh_.subscribe<sensor_msgs::Imu>(
-          imu_sub_topic, 1, boost::bind(
-              &HilListeners::ImuCallback, &hil_listeners_, _1, &hil_data_));
+  imu_sub_ = nh_.subscribe<sensor_msgs::Imu>(
+      imu_sub_topic,
+      1,
+      boost::bind(&HilListeners::ImuCallback, &hil_listeners_, _1, &hil_data_));
 
-  mag_sub_ =
-      nh_.subscribe<sensor_msgs::MagneticField>(
-          mag_sub_topic, 1, boost::bind(
-              &HilListeners::MagCallback, &hil_listeners_, _1, &hil_data_));
+  mag_sub_ = nh_.subscribe<sensor_msgs::MagneticField>(
+      mag_sub_topic,
+      1,
+      boost::bind(&HilListeners::MagCallback, &hil_listeners_, _1, &hil_data_));
 
-  pressure_sub_ =
-      nh_.subscribe<sensor_msgs::FluidPressure>(
-          pressure_sub_topic, 1, boost::bind(
-              &HilListeners::PressureCallback, &hil_listeners_, _1, &hil_data_));
+  pressure_sub_ = nh_.subscribe<sensor_msgs::FluidPressure>(
+      pressure_sub_topic,
+      1,
+      boost::bind(
+          &HilListeners::PressureCallback, &hil_listeners_, _1, &hil_data_));
 }
 
-HilSensorLevelInterface::~HilSensorLevelInterface() {
-}
+HilSensorLevelInterface::~HilSensorLevelInterface() {}
 
 std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
   boost::mutex::scoped_lock lock(mtx_);
@@ -99,7 +110,8 @@ std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
     last_gps_pub_time_nsec_ = current_time.nsec;
 
     // Rotate ground speed data into NED frame
-    Eigen::Vector3i gps_vel = (R_S_B_ * hil_data_.gps_vel_cm_per_s.cast<float>()).cast<int>();
+    Eigen::Vector3i gps_vel =
+        (R_S_B_ * hil_data_.gps_vel_cm_per_s.cast<float>()).cast<int>();
 
     // Fill in a MAVLINK HIL_GPS message and convert it to MAVROS format.
     hil_gps_msg_.time_usec = time_usec;
@@ -119,7 +131,8 @@ std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
     mavlink_hil_gps_t* hil_gps_msg_ptr = &hil_gps_msg_;
     mavlink_msg_hil_gps_encode(1, 0, &mmsg, hil_gps_msg_ptr);
 
-    mavros_msgs::MavlinkPtr rmsg_hil_gps = boost::make_shared<mavros_msgs::Mavlink>();
+    mavros_msgs::MavlinkPtr rmsg_hil_gps =
+        boost::make_shared<mavros_msgs::Mavlink>();
     rmsg_hil_gps->header.stamp.sec = current_time.sec;
     rmsg_hil_gps->header.stamp.nsec = current_time.nsec;
     mavros_msgs::mavlink::convert(mmsg, *rmsg_hil_gps);
@@ -147,7 +160,8 @@ std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
   mavlink_hil_sensor_t* hil_sensor_msg_ptr = &hil_sensor_msg_;
   mavlink_msg_hil_sensor_encode(1, 0, &mmsg, hil_sensor_msg_ptr);
 
-  mavros_msgs::MavlinkPtr rmsg_hil_sensor = boost::make_shared<mavros_msgs::Mavlink>();
+  mavros_msgs::MavlinkPtr rmsg_hil_sensor =
+      boost::make_shared<mavros_msgs::Mavlink>();
   rmsg_hil_sensor->header.stamp.sec = current_time.sec;
   rmsg_hil_sensor->header.stamp.nsec = current_time.nsec;
   mavros_msgs::mavlink::convert(mmsg, *rmsg_hil_sensor);
@@ -157,4 +171,4 @@ std::vector<mavros_msgs::Mavlink> HilSensorLevelInterface::CollectData() {
   return hil_msgs;
 }
 
-}
+}  // namespace rotors_hil

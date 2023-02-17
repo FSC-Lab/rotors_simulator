@@ -22,23 +22,24 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H
 
-#include <iostream>
 #include <math.h>
-
-#include <rotors_gazebo_plugins/common.h>
-#include <gazebo/common/common.hh>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
 #include <octomap/octomap.h>
 #include <ros/ros.h>
 #include <rotors_comm/Octomap.h>
-#include <sdf/sdf.hh>
+#include <rotors_gazebo_plugins/common.h>
 #include <std_srvs/Empty.h>
+
+#include <gazebo/common/common.hh>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <iostream>
+#include <sdf/sdf.hh>
 
 namespace gazebo {
 
 /// \brief    Octomap plugin for Gazebo.
-/// \details  This plugin is dependent on ROS, and is not built if NO_ROS=TRUE is provided to
+/// \details  This plugin is dependent on ROS, and is not built if NO_ROS=TRUE
+/// is provided to
 ///           CMakeLists.txt. The PX4/Firmware build does not build this file.
 class OctomapFromGazeboWorld : public WorldPlugin {
  public:
@@ -47,37 +48,36 @@ class OctomapFromGazeboWorld : public WorldPlugin {
   virtual ~OctomapFromGazeboWorld();
 
  protected:
-
   /// \brief Load the plugin.
   /// \param[in] _parent Pointer to the world that loaded this plugin.
   /// \param[in] _sdf SDF element that describes the plugin.
   void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
 
-  bool CheckIfInterest(const ignition::math::Vector3d & central_point,
+  bool CheckIfInterest(const ignition::math::Vector3d& central_point,
                        gazebo::physics::RayShapePtr ray,
                        const double leaf_size);
 
-  void FloodFill(const ignition::math::Vector3d & seed_point,
-                 const ignition::math::Vector3d & bounding_box_origin,
-                 const ignition::math::Vector3d & bounding_box_lengths,
+  void FloodFill(const ignition::math::Vector3d& seed_point,
+                 const ignition::math::Vector3d& bounding_box_origin,
+                 const ignition::math::Vector3d& bounding_box_lengths,
                  const double leaf_size);
-  
+
   /*! \brief Creates octomap by floodfilling freespace.
-  *
-  * Creates an octomap of the environment in 3 steps:
-  *   -# Casts rays along the central X,Y and Z axis of each cell. Marks any 
-  *     cell where a ray intersects a mesh as occupied
-  *   -# Floodfills the area from the top and bottom marking all connected
-  *     space that has not been set to occupied as free.
-  *   -# Labels all remaining unknown space as occupied.
-  *
-  * Can give incorrect results in the following situations:
-  *   -# The top central cell or bottom central cell are either occupied or
-  *     completely enclosed by occupied cells.
-  *   -# A completely enclosed hollow space will be marked as occupied.
-  *   -# Cells containing a mesh that does not intersect its central axes will
-  *     be marked as unoccupied
-  */
+   *
+   * Creates an octomap of the environment in 3 steps:
+   *   -# Casts rays along the central X,Y and Z axis of each cell. Marks any
+   *     cell where a ray intersects a mesh as occupied
+   *   -# Floodfills the area from the top and bottom marking all connected
+   *     space that has not been set to occupied as free.
+   *   -# Labels all remaining unknown space as occupied.
+   *
+   * Can give incorrect results in the following situations:
+   *   -# The top central cell or bottom central cell are either occupied or
+   *     completely enclosed by occupied cells.
+   *   -# A completely enclosed hollow space will be marked as occupied.
+   *   -# Cells containing a mesh that does not intersect its central axes will
+   *     be marked as unoccupied
+   */
   void CreateOctomap(const rotors_comm::Octomap::Request& msg);
 
  private:
@@ -90,6 +90,6 @@ class OctomapFromGazeboWorld : public WorldPlugin {
                        rotors_comm::Octomap::Response& res);
 };
 
-} // namespace gazebo
+}  // namespace gazebo
 
 #endif  // ROTORS_GAZEBO_PLUGINS_GAZEBO_OCTOMAP_PLUGIN_H

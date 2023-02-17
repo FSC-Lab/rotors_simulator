@@ -23,9 +23,9 @@
 #include <mavros_msgs/mavlink_convert.h>
 
 #ifndef MAVLINK_H
-  typedef mavlink::mavlink_message_t mavlink_message_t;
-  #include <mavlink/v2.0/common/mavlink.h>
-#endif 
+typedef mavlink::mavlink_message_t mavlink_message_t;
+#include <mavlink/v2.0/common/mavlink.h>
+#endif
 
 #include <rotors_hil_interface/hil_listeners.h>
 
@@ -50,7 +50,7 @@ class HilInterface {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   /// \brief Destructor
-  virtual ~HilInterface() {};
+  virtual ~HilInterface(){};
 
   /// \brief Gather data collected from ROS messages into MAVLINK messages.
   /// \return Vector of MAVLINK messages (in MAVROS format) to be publised.
@@ -123,7 +123,7 @@ class HilStateLevelInterface : public HilInterface {
  public:
   /// \brief Constructor
   /// \param[in] q_S_B Quaternion rotation from body frame to NED frame.
-  HilStateLevelInterface(const Eigen::Quaterniond &q_S_B);
+  HilStateLevelInterface(const Eigen::Quaterniond& q_S_B);
 
   /// \brief Destructor
   virtual ~HilStateLevelInterface();
@@ -134,6 +134,6 @@ class HilStateLevelInterface : public HilInterface {
   /// MAVLINK HIL_STATE_QUATERNION message.
   mavlink_hil_state_quaternion_t hil_state_qtrn_msg_;
 };
-}
+}  // namespace rotors_hil
 
-#endif // ROTORS_HIL_INTERFACE_H_
+#endif  // ROTORS_HIL_INTERFACE_H_

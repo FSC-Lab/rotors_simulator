@@ -21,10 +21,6 @@
 #ifndef ROTORS_CONTROL_LEE_POSITION_CONTROLLER_NODE_H
 #define ROTORS_CONTROL_LEE_POSITION_CONTROLLER_NODE_H
 
-#include <boost/bind.hpp>
-#include <Eigen/Eigen>
-#include <stdio.h>
-
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/Actuators.h>
 #include <mav_msgs/AttitudeThrust.h>
@@ -32,7 +28,11 @@
 #include <nav_msgs/Odometry.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
+#include <stdio.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
+
+#include <Eigen/Eigen>
+#include <boost/bind.hpp>
 
 #include "rotors_control/common.h"
 #include "rotors_control/lee_position_controller.h"
@@ -41,7 +41,8 @@ namespace rotors_control {
 
 class LeePositionControllerNode {
  public:
-  LeePositionControllerNode(const ros::NodeHandle& nh, const ros::NodeHandle& private_nh);
+  LeePositionControllerNode(const ros::NodeHandle& nh,
+                            const ros::NodeHandle& private_nh);
   ~LeePositionControllerNode();
 
   void InitializeParams();
@@ -70,13 +71,13 @@ class LeePositionControllerNode {
   void TimedCommandCallback(const ros::TimerEvent& e);
 
   void MultiDofJointTrajectoryCallback(
-      const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
+      const trajectory_msgs::MultiDOFJointTrajectoryConstPtr&
+          trajectory_reference_msg);
 
-  void CommandPoseCallback(
-      const geometry_msgs::PoseStampedConstPtr& pose_msg);
+  void CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
 
   void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
 };
-}
+}  // namespace rotors_control
 
-#endif // ROTORS_CONTROL_LEE_POSITION_CONTROLLER_NODE_H
+#endif  // ROTORS_CONTROL_LEE_POSITION_CONTROLLER_NODE_H

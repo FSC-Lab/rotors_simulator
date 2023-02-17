@@ -26,8 +26,7 @@
 
 namespace gazebo {
 
-GazeboControllerInterface::~GazeboControllerInterface() {
-}
+GazeboControllerInterface::~GazeboControllerInterface() {}
 
 void GazeboControllerInterface::Load(physics::ModelPtr _model,
                                      sdf::ElementPtr _sdf) {
@@ -57,10 +56,12 @@ void GazeboControllerInterface::Load(physics::ModelPtr _model,
   // Initialise with default namespace (typically /gazebo/default/)
   node_handle_->Init();
 
-  getSdfParam<std::string>(_sdf, "commandMotorSpeedSubTopic",
+  getSdfParam<std::string>(_sdf,
+                           "commandMotorSpeedSubTopic",
                            command_motor_speed_sub_topic_,
                            command_motor_speed_sub_topic_);
-  getSdfParam<std::string>(_sdf, "motorSpeedCommandPubTopic",
+  getSdfParam<std::string>(_sdf,
+                           "motorSpeedCommandPubTopic",
                            motor_velocity_reference_pub_topic_,
                            motor_velocity_reference_pub_topic_);
 
@@ -147,7 +148,8 @@ void GazeboControllerInterface::CreatePubsAndSubs() {
         << std::endl;
   cmd_motor_sub_ = node_handle_->Subscribe(
       "~/" + namespace_ + "/" + command_motor_speed_sub_topic_,
-      &GazeboControllerInterface::CommandMotorCallback, this);
+      &GazeboControllerInterface::CommandMotorCallback,
+      this);
 
   // Connect to ROS
   gz_std_msgs::ConnectRosToGazeboTopic connect_ros_to_gazebo_topic_msg;
@@ -182,4 +184,4 @@ void GazeboControllerInterface::CommandMotorCallback(
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboControllerInterface);
-}
+}  // namespace gazebo

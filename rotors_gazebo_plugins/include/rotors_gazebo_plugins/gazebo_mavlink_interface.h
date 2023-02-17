@@ -18,6 +18,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <CommandMotorSpeed.pb.h>
+#include <Imu.pb.h>
+#include <Lidar.pb.h>
+#include <OpticalFlow.pb.h>
+#include <math.h>
+#include <mavlink/v2.0/common/mavlink.h>
+#include <netinet/in.h>
+#include <rotors_gazebo_plugins/geo_mag_declination.h>
+#include <stdio.h>
+#include <sys/socket.h>
+
+#include <Eigen/Eigen>
 #include <atomic>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -25,44 +37,28 @@
 #include <boost/system/system_error.hpp>
 #include <cassert>
 #include <chrono>
-#include <deque>
-#include <memory>
-#include <mutex>
-#include <sstream>
-#include <stdexcept>
-#include <thread>
-#include <vector>
-
 #include <cstdlib>
-#include <iostream>
-#include <math.h>
-#include <netinet/in.h>
-#include <random>
-#include <stdio.h>
-#include <string>
-#include <sys/socket.h>
-
-#include <Eigen/Eigen>
-
+#include <deque>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/transport.hh>
-
-#include <CommandMotorSpeed.pb.h>
-#include <Imu.pb.h>
-#include <Lidar.pb.h>
-#include <OpticalFlow.pb.h>
 #include <ignition/math.hh>
+#include <iostream>
+#include <memory>
+#include <mutex>
+#include <random>
 #include <sdf/sdf.hh>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include "common.h"
-
-#include <mavlink/v2.0/common/mavlink.h>
 #include "msgbuffer.h"
-
-#include <rotors_gazebo_plugins/geo_mag_declination.h>
 
 static const uint32_t kDefaultMavlinkUdpPort = 14560;
 static const uint32_t kDefaultQGCUdpPort = 14550;
@@ -204,8 +200,8 @@ class GazeboMavlinkInterface : public ModelPlugin {
   void ImuCallback(ImuPtr& imu_msg);
   void LidarCallback(LidarPtr& lidar_msg);
   void OpticalFlowCallback(OpticalFlowPtr& opticalFlow_msg);
-  void send_mavlink_message(
-      const mavlink_message_t* message, const int destination_port = 0);
+  void send_mavlink_message(const mavlink_message_t* message,
+                            const int destination_port = 0);
   void handle_message(mavlink_message_t* msg);
   void pollForMAVLinkMessages(double _dt, uint32_t _timeoutMs);
 
@@ -215,9 +211,7 @@ class GazeboMavlinkInterface : public ModelPlugin {
   void do_read();
   void parse_buffer(const boost::system::error_code& err, std::size_t bytes_t);
   void do_write(bool check_tx_state);
-  inline bool is_open() {
-    return serial_dev_.is_open();
-  }
+  inline bool is_open() { return serial_dev_.is_open(); }
 
   // Set the number of BLDC motors and tilting servos,
   // if using flags to differentiate.

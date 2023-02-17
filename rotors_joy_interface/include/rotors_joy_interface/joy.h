@@ -18,7 +18,6 @@
  * limitations under the License.
  */
 
-
 #ifndef ROTORS_JOY_INTERFACE_JOY_H_
 #define ROTORS_JOY_INTERFACE_JOY_H_
 
@@ -86,4 +85,4 @@ class Joy {
   Joy();
 };
 
-#endif // ROTORS_JOY_INTERFACE_JOY_H_
+#endif  // ROTORS_JOY_INTERFACE_JOY_H_

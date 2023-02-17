@@ -29,9 +29,7 @@
 
 namespace gazebo {
 
-GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {
-  
-}
+GazeboMultirotorBasePlugin::~GazeboMultirotorBasePlugin() {}
 
 void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model,
                                       sdf::ElementPtr _sdf) {
@@ -43,12 +41,13 @@ void GazeboMultirotorBasePlugin::Load(physics::ModelPtr _model,
   world_ = model_->GetWorld();
   namespace_.clear();
 
-  getSdfParam<std::string>(_sdf, "robotNamespace", namespace_, namespace_,
-                           true);
+  getSdfParam<std::string>(
+      _sdf, "robotNamespace", namespace_, namespace_, true);
   getSdfParam<std::string>(_sdf, "linkName", link_name_, link_name_, true);
-  getSdfParam<std::string>(_sdf, "motorPubTopic", actuators_pub_topic_,
-                           actuators_pub_topic_);
-  getSdfParam<double>(_sdf, "rotorVelocitySlowdownSim",
+  getSdfParam<std::string>(
+      _sdf, "motorPubTopic", actuators_pub_topic_, actuators_pub_topic_);
+  getSdfParam<double>(_sdf,
+                      "rotorVelocitySlowdownSim",
                       rotor_velocity_slowdown_sim_,
                       rotor_velocity_slowdown_sim_);
 

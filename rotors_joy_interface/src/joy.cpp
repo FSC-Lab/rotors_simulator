@@ -18,7 +18,6 @@
  * limitations under the License.
  */
 
-
 #include "rotors_joy_interface/joy.h"
 
 #include <mav_msgs/default_topics.h>
@@ -26,8 +25,8 @@
 Joy::Joy() {
   ros::NodeHandle nh;
   ros::NodeHandle pnh("~");
-  ctrl_pub_ = nh_.advertise<mav_msgs::RollPitchYawrateThrust> (
-    mav_msgs::default_topics::COMMAND_ROLL_PITCH_YAWRATE_THRUST, 10);
+  ctrl_pub_ = nh_.advertise<mav_msgs::RollPitchYawrateThrust>(
+      mav_msgs::default_topics::COMMAND_ROLL_PITCH_YAWRATE_THRUST, 10);
 
   control_msg_.roll = 0;
   control_msg_.pitch = 0;
@@ -45,11 +44,11 @@ Joy::Joy() {
   pnh.param("axis_direction_pitch", axes_.pitch_direction, 1);
   pnh.param("axis_direction_thrust", axes_.thrust_direction, 1);
 
-  pnh.param("max_v_xy", max_.v_xy, 1.0);  // [m/s]
-  pnh.param("max_roll", max_.roll, 10.0 * M_PI / 180.0);  // [rad]
-  pnh.param("max_pitch", max_.pitch, 10.0 * M_PI / 180.0);  // [rad]
+  pnh.param("max_v_xy", max_.v_xy, 1.0);                          // [m/s]
+  pnh.param("max_roll", max_.roll, 10.0 * M_PI / 180.0);          // [rad]
+  pnh.param("max_pitch", max_.pitch, 10.0 * M_PI / 180.0);        // [rad]
   pnh.param("max_yaw_rate", max_.rate_yaw, 45.0 * M_PI / 180.0);  // [rad/s]
-  pnh.param("max_thrust", max_.thrust, 30.0);  // [N]
+  pnh.param("max_thrust", max_.thrust, 30.0);                     // [N]
 
   pnh.param("v_yaw_step", v_yaw_step_, 0.05);  // [rad/s]
 
@@ -78,15 +77,14 @@ void Joy::StopMav() {
 void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
   current_joy_ = *msg;
   control_msg_.roll = msg->axes[axes_.roll] * max_.roll * axes_.roll_direction;
-  control_msg_.pitch = msg->axes[axes_.pitch] * max_.pitch * axes_.pitch_direction;
+  control_msg_.pitch =
+      msg->axes[axes_.pitch] * max_.pitch * axes_.pitch_direction;
 
   if (msg->buttons[buttons_.yaw_left]) {
     current_yaw_vel_ = max_.rate_yaw;
-  }
-  else if (msg->buttons[buttons_.yaw_right]) {
+  } else if (msg->buttons[buttons_.yaw_right]) {
     current_yaw_vel_ = -max_.rate_yaw;
-  }
-  else {
+  } else {
     current_yaw_vel_ = 0;
   }
   control_msg_.yaw_rate = current_yaw_vel_;
@@ -94,9 +92,9 @@ void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
   if (is_fixed_wing_) {
     double thrust = msg->axes[axes_.thrust] * axes_.thrust_direction;
     control_msg_.thrust.x = (thrust >= 0.0) ? thrust : 0.0;
-  }
-  else {
-    control_msg_.thrust.z = (msg->axes[axes_.thrust] + 1) * max_.thrust / 2.0 * axes_.thrust_direction;
+  } else {
+    control_msg_.thrust.z = (msg->axes[axes_.thrust] + 1) * max_.thrust / 2.0 *
+                            axes_.thrust_direction;
   }
 
   ros::Time update_time = ros::Time::now();
@@ -105,9 +103,7 @@ void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
   Publish();
 }
 
-void Joy::Publish() {
-  ctrl_pub_.publish(control_msg_);
-}
+void Joy::Publish() { ctrl_pub_.publish(control_msg_); }
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "rotors_joy_interface");

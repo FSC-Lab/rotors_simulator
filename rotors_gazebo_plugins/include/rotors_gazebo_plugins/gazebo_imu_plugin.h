@@ -22,16 +22,14 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_IMU_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_IMU_PLUGIN_H
 
-#include <random>
-
 #include <Eigen/Core>
-#include <gazebo/common/common.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <random>
 
 #include "Imu.pb.h"
-
 #include "rotors_gazebo_plugins/common.h"
 
 namespace gazebo {
@@ -41,16 +39,12 @@ static constexpr double kDefaultAdisGyroscopeNoiseDensity =
     2.0 * 35.0 / 3600.0 / 180.0 * M_PI;
 static constexpr double kDefaultAdisGyroscopeRandomWalk =
     2.0 * 4.0 / 3600.0 / 180.0 * M_PI;
-static constexpr double kDefaultAdisGyroscopeBiasCorrelationTime =
-    1.0e+3;
+static constexpr double kDefaultAdisGyroscopeBiasCorrelationTime = 1.0e+3;
 static constexpr double kDefaultAdisGyroscopeTurnOnBiasSigma =
     0.5 / 180.0 * M_PI;
-static constexpr double kDefaultAdisAccelerometerNoiseDensity =
-    2.0 * 2.0e-3;
-static constexpr double kDefaultAdisAccelerometerRandomWalk =
-    2.0 * 3.0e-3;
-static constexpr double kDefaultAdisAccelerometerBiasCorrelationTime =
-    300.0;
+static constexpr double kDefaultAdisAccelerometerNoiseDensity = 2.0 * 2.0e-3;
+static constexpr double kDefaultAdisAccelerometerRandomWalk = 2.0 * 3.0e-3;
+static constexpr double kDefaultAdisAccelerometerBiasCorrelationTime = 300.0;
 static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma =
     20.0e-3 * 9.8;
 // Earth's gravity in Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84)
@@ -96,7 +90,6 @@ struct ImuParameters {
 
 class GazeboImuPlugin : public ModelPlugin {
  public:
-
   GazeboImuPlugin();
   ~GazeboImuPlugin();
 
@@ -108,27 +101,28 @@ class GazeboImuPlugin : public ModelPlugin {
 
   /// \brief  This method adds noise to acceleration and angular rates for
   ///         accelerometer and gyroscope measurement simulation.
-  void AddNoise(
-      Eigen::Vector3d* linear_acceleration,
-      Eigen::Vector3d* angular_velocity,
-      const double dt);
+  void AddNoise(Eigen::Vector3d* linear_acceleration,
+                Eigen::Vector3d* angular_velocity,
+                const double dt);
 
   /// \brief  	This gets called by the world update start event.
   /// \details	Calculates IMU parameters and then publishes one IMU message.
   void OnUpdate(const common::UpdateInfo&);
 
  private:
-
-  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called, used
-  ///           to prevent CreatePubsAndSubs() from be called on every OnUpdate().
+  /// \brief    Flag that is set to true once CreatePubsAndSubs() is called,
+  /// used
+  ///           to prevent CreatePubsAndSubs() from be called on every
+  ///           OnUpdate().
   bool pubs_and_subs_created_;
 
-  /// \brief    Creates all required publishers and subscribers, incl. routing of messages to/from ROS if required.
-  /// \details  Call this once the first time OnUpdate() is called (can't
-  ///           be called from Load() because there is no guarantee GazeboRosInterfacePlugin has
-  ///           has loaded and listening to ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
+  /// \brief    Creates all required publishers and subscribers, incl. routing
+  /// of messages to/from ROS if required. \details  Call this once the first
+  /// time OnUpdate() is called (can't
+  ///           be called from Load() because there is no guarantee
+  ///           GazeboRosInterfacePlugin has has loaded and listening to
+  ///           ConnectGazeboToRosTopic and ConnectRosToGazeboTopic messages).
   void CreatePubsAndSubs();
-
 
   std::string namespace_;
   std::string imu_topic_;
@@ -177,4 +171,4 @@ class GazeboImuPlugin : public ModelPlugin {
 
 }  // namespace gazebo
 
-#endif // ROTORS_GAZEBO_PLUGINS_IMU_PLUGIN_H
+#endif  // ROTORS_GAZEBO_PLUGINS_IMU_PLUGIN_H

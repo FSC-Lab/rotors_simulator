@@ -23,15 +23,12 @@
 namespace gazebo {
 
 GazeboPressurePlugin::GazeboPressurePlugin()
-    : ModelPlugin(),
-      node_handle_(0),
-      pubs_and_subs_created_(false) {
-}
+    : ModelPlugin(), node_handle_(0), pubs_and_subs_created_(false) {}
 
-GazeboPressurePlugin::~GazeboPressurePlugin() {
-}
+GazeboPressurePlugin::~GazeboPressurePlugin() {}
 
-void GazeboPressurePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+void GazeboPressurePlugin::Load(physics::ModelPtr _model,
+                                sdf::ElementPtr _sdf) {
   if (kPrintOnPluginLoad) {
     gzdbg << __FUNCTION__ << "() called." << std::endl;
   }
@@ -66,14 +63,17 @@ void GazeboPressurePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   // Get the pointer to the link.
   link_ = model_->GetLink(link_name);
   if (link_ == NULL)
-    gzthrow("[gazebo_pressure_plugin] Couldn't find specified link \"" << link_name << "\".");
+    gzthrow("[gazebo_pressure_plugin] Couldn't find specified link \""
+            << link_name << "\".");
 
   frame_id_ = link_name;
 
   // Retrieve the rest of the SDF parameters.
-  getSdfParam<std::string>(_sdf, "pressureTopic", pressure_topic_, kDefaultPressurePubTopic);
+  getSdfParam<std::string>(
+      _sdf, "pressureTopic", pressure_topic_, kDefaultPressurePubTopic);
   getSdfParam<double>(_sdf, "referenceAltitude", ref_alt_, kDefaultRefAlt);
-  getSdfParam<double>(_sdf, "pressureVariance", pressure_var_, kDefaultPressureVar);
+  getSdfParam<double>(
+      _sdf, "pressureVariance", pressure_var_, kDefaultPressureVar);
   CHECK(pressure_var_ >= 0.0);
 
   // Initialize the normal distribution for pressure.
@@ -110,7 +110,7 @@ void GazeboPressurePlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Compute the geopotential height.
   double height_geopotential_m = kEarthRadiusMeters * height_geometric_m /
-      (kEarthRadiusMeters + height_geometric_m);
+                                 (kEarthRadiusMeters + height_geometric_m);
 
   // Compute the temperature at the current altitude.
   double temperature_at_altitude_kelvin =
@@ -118,11 +118,12 @@ void GazeboPressurePlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   // Compute the current air pressure.
   double pressure_at_altitude_pascal =
-      kPressureOneAtmospherePascals * exp(kAirConstantDimensionless *
+      kPressureOneAtmospherePascals *
+      exp(kAirConstantDimensionless *
           log(kSeaLevelTempKelvin / temperature_at_altitude_kelvin));
 
   // Add noise to pressure measurement.
-  if(pressure_var_ > 0.0) {
+  if (pressure_var_ > 0.0) {
     pressure_at_altitude_pascal += pressure_n_[0](random_generator_);
   }
 

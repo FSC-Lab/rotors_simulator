@@ -32,6 +32,7 @@
 
 // USER
 #include <rotors_gazebo_plugins/common.h>
+
 #include "ConnectGazeboToRosTopic.pb.h"
 #include "ConnectRosToGazeboTopic.pb.h"
 #include "PoseStamped.pb.h"
@@ -42,8 +43,7 @@
 
 namespace gazebo {
 
-GazeboOdometryPlugin::~GazeboOdometryPlugin() {
-}
+GazeboOdometryPlugin::~GazeboOdometryPlugin() {}
 
 void GazeboOdometryPlugin::Load(physics::ModelPtr _model,
                                 sdf::ElementPtr _sdf) {
@@ -106,41 +106,54 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model,
         std::chrono::system_clock::now().time_since_epoch().count());
   }
   getSdfParam<std::string>(_sdf, "poseTopic", pose_pub_topic_, pose_pub_topic_);
-  getSdfParam<std::string>(_sdf, "poseWithCovarianceTopic",
+  getSdfParam<std::string>(_sdf,
+                           "poseWithCovarianceTopic",
                            pose_with_covariance_stamped_pub_topic_,
                            pose_with_covariance_stamped_pub_topic_);
-  getSdfParam<std::string>(_sdf, "positionTopic", position_stamped_pub_topic_,
+  getSdfParam<std::string>(_sdf,
+                           "positionTopic",
+                           position_stamped_pub_topic_,
                            position_stamped_pub_topic_);
-  getSdfParam<std::string>(_sdf, "transformTopic", transform_stamped_pub_topic_,
+  getSdfParam<std::string>(_sdf,
+                           "transformTopic",
+                           transform_stamped_pub_topic_,
                            transform_stamped_pub_topic_);
-  getSdfParam<std::string>(_sdf, "odometryTopic", odometry_pub_topic_,
-                           odometry_pub_topic_);
-  getSdfParam<std::string>(_sdf, "parentFrameId", parent_frame_id_,
-                           parent_frame_id_);
-  getSdfParam<std::string>(_sdf, "childFrameId", child_frame_id_,
-                           child_frame_id_);
-  getSdfParam<SdfVector3>(_sdf, "noiseNormalPosition", noise_normal_position,
+  getSdfParam<std::string>(
+      _sdf, "odometryTopic", odometry_pub_topic_, odometry_pub_topic_);
+  getSdfParam<std::string>(
+      _sdf, "parentFrameId", parent_frame_id_, parent_frame_id_);
+  getSdfParam<std::string>(
+      _sdf, "childFrameId", child_frame_id_, child_frame_id_);
+  getSdfParam<SdfVector3>(
+      _sdf, "noiseNormalPosition", noise_normal_position, zeros3);
+  getSdfParam<SdfVector3>(
+      _sdf, "noiseNormalQuaternion", noise_normal_quaternion, zeros3);
+  getSdfParam<SdfVector3>(
+      _sdf, "noiseNormalLinearVelocity", noise_normal_linear_velocity, zeros3);
+  getSdfParam<SdfVector3>(_sdf,
+                          "noiseNormalAngularVelocity",
+                          noise_normal_angular_velocity,
                           zeros3);
-  getSdfParam<SdfVector3>(_sdf, "noiseNormalQuaternion",
-                          noise_normal_quaternion, zeros3);
-  getSdfParam<SdfVector3>(_sdf, "noiseNormalLinearVelocity",
-                          noise_normal_linear_velocity, zeros3);
-  getSdfParam<SdfVector3>(_sdf, "noiseNormalAngularVelocity",
-                          noise_normal_angular_velocity, zeros3);
-  getSdfParam<SdfVector3>(_sdf, "noiseUniformPosition", noise_uniform_position,
+  getSdfParam<SdfVector3>(
+      _sdf, "noiseUniformPosition", noise_uniform_position, zeros3);
+  getSdfParam<SdfVector3>(
+      _sdf, "noiseUniformQuaternion", noise_uniform_quaternion, zeros3);
+  getSdfParam<SdfVector3>(_sdf,
+                          "noiseUniformLinearVelocity",
+                          noise_uniform_linear_velocity,
                           zeros3);
-  getSdfParam<SdfVector3>(_sdf, "noiseUniformQuaternion",
-                          noise_uniform_quaternion, zeros3);
-  getSdfParam<SdfVector3>(_sdf, "noiseUniformLinearVelocity",
-                          noise_uniform_linear_velocity, zeros3);
-  getSdfParam<SdfVector3>(_sdf, "noiseUniformAngularVelocity",
-                          noise_uniform_angular_velocity, zeros3);
-  getSdfParam<int>(_sdf, "measurementDelay", measurement_delay_,
-                   measurement_delay_);
-  getSdfParam<int>(_sdf, "measurementDivisor", measurement_divisor_,
-                   measurement_divisor_);
+  getSdfParam<SdfVector3>(_sdf,
+                          "noiseUniformAngularVelocity",
+                          noise_uniform_angular_velocity,
+                          zeros3);
+  getSdfParam<int>(
+      _sdf, "measurementDelay", measurement_delay_, measurement_delay_);
+  getSdfParam<int>(
+      _sdf, "measurementDivisor", measurement_divisor_, measurement_divisor_);
   getSdfParam<double>(_sdf, "unknownDelay", unknown_delay_, unknown_delay_);
-  getSdfParam<double>(_sdf, "covarianceImageScale", covariance_image_scale_,
+  getSdfParam<double>(_sdf,
+                      "covarianceImageScale",
+                      covariance_image_scale_,
                       covariance_image_scale_);
 
   parent_link_ = world_->EntityByName(parent_frame_id_);
@@ -200,7 +213,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model,
       -noise_uniform_angular_velocity.Z(), noise_uniform_angular_velocity.Z());
 
   // Fill in covariance. We omit uniform noise here.
-  Eigen::Map<Eigen::Matrix<double, 6, 6> > pose_covariance(
+  Eigen::Map<Eigen::Matrix<double, 6, 6>> pose_covariance(
       pose_covariance_matrix_.data());
   Eigen::Matrix<double, 6, 1> pose_covd;
 
@@ -213,7 +226,7 @@ void GazeboOdometryPlugin::Load(physics::ModelPtr _model,
   pose_covariance = pose_covd.asDiagonal();
 
   // Fill in covariance. We omit uniform noise here.
-  Eigen::Map<Eigen::Matrix<double, 6, 6> > twist_covariance(
+  Eigen::Map<Eigen::Matrix<double, 6, 6>> twist_covariance(
       twist_covariance_matrix_.data());
   Eigen::Matrix<double, 6, 1> twist_covd;
 
@@ -255,7 +268,8 @@ void GazeboOdometryPlugin::OnUpdate(const common::UpdateInfo& _info) {
 
   if (parent_frame_id_ != kDefaultParentFrameId) {
     ignition::math::Pose3d W_pose_W_P = parent_link_->WorldPose();
-    ignition::math::Vector3d P_linear_velocity_W_P = parent_link_->RelativeLinearVel();
+    ignition::math::Vector3d P_linear_velocity_W_P =
+        parent_link_->RelativeLinearVel();
     ignition::math::Vector3d P_angular_velocity_W_P =
         parent_link_->RelativeAngularVel();
     ignition::math::Pose3d C_pose_P_C_ = W_pose_W_C - W_pose_W_P;

@@ -18,8 +18,7 @@
 
 namespace rotors_hil {
 
-HilInterfaceNode::HilInterfaceNode() :
-    rate_(kDefaultHilFrequency) {
+HilInterfaceNode::HilInterfaceNode() : rate_(kDefaultHilFrequency) {
   ros::NodeHandle pnh("~");
 
   bool sensor_level_hil;
@@ -36,9 +35,13 @@ HilInterfaceNode::HilInterfaceNode() :
   pnh.param("body_to_sensor_roll", S_B_roll, kDefaultBodyToSensorsRoll);
   pnh.param("body_to_sensor_pitch", S_B_pitch, kDefaultBodyToSensorsPitch);
   pnh.param("body_to_sensor_yaw", S_B_yaw, kDefaultBodyToSensorsYaw);
-  pnh.param("actuators_pub_topic", actuators_pub_topic, std::string(mav_msgs::default_topics::COMMAND_ACTUATORS));
+  pnh.param("actuators_pub_topic",
+            actuators_pub_topic,
+            std::string(mav_msgs::default_topics::COMMAND_ACTUATORS));
   pnh.param("mavlink_pub_topic", mavlink_pub_topic, kDefaultMavlinkPubTopic);
-  pnh.param("hil_controls_sub_topic", hil_controls_sub_topic, kDefaultHilControlsSubTopic);
+  pnh.param("hil_controls_sub_topic",
+            hil_controls_sub_topic,
+            kDefaultHilControlsSubTopic);
 
   // Create the quaternion and rotation matrix to rotate data into NED frame.
   Eigen::AngleAxisd roll_angle(S_B_roll, Eigen::Vector3d::UnitX());
@@ -48,20 +51,21 @@ HilInterfaceNode::HilInterfaceNode() :
   const Eigen::Quaterniond q_S_B = roll_angle * pitch_angle * yaw_angle;
 
   if (sensor_level_hil)
-    hil_interface_ = std::unique_ptr<HilSensorLevelInterface>(new HilSensorLevelInterface(q_S_B));
+    hil_interface_ = std::unique_ptr<HilSensorLevelInterface>(
+        new HilSensorLevelInterface(q_S_B));
   else
-    hil_interface_ = std::unique_ptr<HilStateLevelInterface>(new HilStateLevelInterface(q_S_B));
+    hil_interface_ = std::unique_ptr<HilStateLevelInterface>(
+        new HilStateLevelInterface(q_S_B));
 
   rate_ = ros::Rate(hil_frequency);
 
   actuators_pub_ = nh_.advertise<mav_msgs::Actuators>(actuators_pub_topic, 1);
   mavlink_pub_ = nh_.advertise<mavros_msgs::Mavlink>(mavlink_pub_topic, 5);
-  hil_controls_sub_ = nh_.subscribe(hil_controls_sub_topic, 1,
-                                        &HilInterfaceNode::HilControlsCallback, this);
+  hil_controls_sub_ = nh_.subscribe(
+      hil_controls_sub_topic, 1, &HilInterfaceNode::HilControlsCallback, this);
 }
 
-HilInterfaceNode::~HilInterfaceNode() {
-}
+HilInterfaceNode::~HilInterfaceNode() {}
 
 void HilInterfaceNode::MainTask() {
   while (ros::ok()) {
@@ -77,7 +81,8 @@ void HilInterfaceNode::MainTask() {
   }
 }
 
-void HilInterfaceNode::HilControlsCallback(const mavros_msgs::HilControlsConstPtr& hil_controls_msg) {
+void HilInterfaceNode::HilControlsCallback(
+    const mavros_msgs::HilControlsConstPtr& hil_controls_msg) {
   mav_msgs::Actuators act_msg;
 
   ros::Time current_time = ros::Time::now();
@@ -95,7 +100,7 @@ void HilInterfaceNode::HilControlsCallback(const mavros_msgs::HilControlsConstPt
   actuators_pub_.publish(act_msg);
 }
 
-}
+}  // namespace rotors_hil
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "rotors_hil_interface_node");

@@ -30,7 +30,8 @@ class AttitudeController : public ControllerBase {
   virtual ~AttitudeController();
   virtual void InitializeParams();
   virtual std::shared_ptr<ControllerBase> Clone();
-  virtual void CalculateRotorVelocities(Eigen::VectorXd* rotor_velocities) const;
+  virtual void CalculateRotorVelocities(
+      Eigen::VectorXd* rotor_velocities) const;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
  private:
@@ -43,8 +44,7 @@ class AttitudeController : public ControllerBase {
   double mass_;
   const double gravity_;
 
-  void ComputeDesiredAngularAcc(Eigen::Vector3d * angular_acceleration) const;
-
+  void ComputeDesiredAngularAcc(Eigen::Vector3d* angular_acceleration) const;
 };
 
-#endif // ROTORS_CONTROL_ATTITUDE_CONTROLLER_H
+#endif  // ROTORS_CONTROL_ATTITUDE_CONTROLLER_H

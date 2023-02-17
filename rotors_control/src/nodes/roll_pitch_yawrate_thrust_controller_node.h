@@ -21,16 +21,16 @@
 #ifndef ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_NODE_H
 #define ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_NODE_H
 
-#include <boost/bind.hpp>
-#include <Eigen/Eigen>
+#include <geometry_msgs/PoseStamped.h>
+#include <mav_msgs/Actuators.h>
+#include <mav_msgs/RollPitchYawrateThrust.h>
+#include <nav_msgs/Odometry.h>
+#include <ros/callback_queue.h>
+#include <ros/ros.h>
 #include <stdio.h>
 
-#include <geometry_msgs/PoseStamped.h>
-#include <mav_msgs/RollPitchYawrateThrust.h>
-#include <mav_msgs/Actuators.h>
-#include <nav_msgs/Odometry.h>
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
+#include <Eigen/Eigen>
+#include <boost/bind.hpp>
 
 #include "rotors_control/common.h"
 #include "rotors_control/roll_pitch_yawrate_thrust_controller.h"
@@ -46,7 +46,6 @@ class RollPitchYawrateThrustControllerNode {
   void Publish();
 
  private:
-
   RollPitchYawrateThrustController roll_pitch_yawrate_thrust_controller_;
 
   std::string namespace_;
@@ -58,10 +57,11 @@ class RollPitchYawrateThrustControllerNode {
   ros::Publisher motor_velocity_reference_pub_;
 
   void RollPitchYawrateThrustCallback(
-      const mav_msgs::RollPitchYawrateThrustConstPtr& roll_pitch_yawrate_thrust_reference_msg);
+      const mav_msgs::RollPitchYawrateThrustConstPtr&
+          roll_pitch_yawrate_thrust_reference_msg);
 
   void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
 };
-}
+}  // namespace rotors_control
 
-#endif // ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_NODE_H
+#endif  // ROTORS_CONTROL_ROLL_PITCH_YAWRATE_THRUST_CONTROLLER_NODE_H

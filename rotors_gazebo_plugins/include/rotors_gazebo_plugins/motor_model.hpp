@@ -18,40 +18,35 @@
  * limitations under the License.
  */
 
-
 #ifndef ROTORS_GAZEBO_PLUGINS_MOTOR_MODEL_H
 #define ROTORS_GAZEBO_PLUGINS_MOTOR_MODEL_H
 
 #include <Eigen/Eigen>
 
-class MotorModel
-{
-  public:
-    MotorModel()
-        : motor_rot_vel_(0.0),
-          ref_motor_rot_vel_(0.0),
-          prev_sim_time_(0.0),
-          sampling_time_(0.01) {}
-    virtual ~MotorModel() {}
-    void GetMotorVelocity(double &result) const {
-      result = motor_rot_vel_;
-    }
-    void SetReferenceMotorVelocity(double ref_motor_rot_vel) {
-      ref_motor_rot_vel_ = ref_motor_rot_vel;
-    }
+class MotorModel {
+ public:
+  MotorModel()
+      : motor_rot_vel_(0.0),
+        ref_motor_rot_vel_(0.0),
+        prev_sim_time_(0.0),
+        sampling_time_(0.01) {}
+  virtual ~MotorModel() {}
+  void GetMotorVelocity(double& result) const { result = motor_rot_vel_; }
+  void SetReferenceMotorVelocity(double ref_motor_rot_vel) {
+    ref_motor_rot_vel_ = ref_motor_rot_vel;
+  }
 
-    virtual void InitializeParams() = 0;
-    virtual void Publish() = 0;
+  virtual void InitializeParams() = 0;
+  virtual void Publish() = 0;
 
-  protected:
-    double motor_rot_vel_;
-    double ref_motor_rot_vel_;
-    double prev_ref_motor_rot_vel_;
-    double prev_sim_time_;
-    double sampling_time_;
+ protected:
+  double motor_rot_vel_;
+  double ref_motor_rot_vel_;
+  double prev_ref_motor_rot_vel_;
+  double prev_sim_time_;
+  double sampling_time_;
 
-
-    virtual void UpdateForcesAndMoments() = 0;
+  virtual void UpdateForcesAndMoments() = 0;
 };
 
-#endif // ROTORS_GAZEBO_PLUGINS_MOTOR_MODEL_H
+#endif  // ROTORS_GAZEBO_PLUGINS_MOTOR_MODEL_H

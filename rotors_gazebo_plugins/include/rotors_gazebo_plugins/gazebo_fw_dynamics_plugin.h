@@ -17,16 +17,16 @@
 #ifndef ROTORS_GAZEBO_PLUGINS_FW_DYNAMICS_PLUGIN_H
 #define ROTORS_GAZEBO_PLUGINS_FW_DYNAMICS_PLUGIN_H
 
+#include <mav_msgs/default_topics.h>
+
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <mav_msgs/default_topics.h>
 
 #include "Actuators.pb.h"
 #include "RollPitchYawrateThrust.pb.h"
 #include "WindSpeed.pb.h"
-
 #include "rotors_gazebo_plugins/common.h"
 #include "rotors_gazebo_plugins/fw_parameters.h"
 
@@ -36,8 +36,7 @@ typedef const boost::shared_ptr<const gz_sensor_msgs::Actuators>
     GzActuatorsMsgPtr;
 typedef const boost::shared_ptr<const gz_mav_msgs::RollPitchYawrateThrust>
     GzRollPitchYawrateThrustMsgPtr;
-typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed>
-    GzWindSpeedMsgPtr;
+typedef const boost::shared_ptr<const gz_mav_msgs::WindSpeed> GzWindSpeedMsgPtr;
 
 // Default values.
 static constexpr bool kDefaultIsInputJoystick = false;
@@ -149,8 +148,8 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
   /// \details  Converts the inputs into physical angles before storing them
   ///           and thrust values for later use in calculation of forces and
   ///           moments.
-  void RollPitchYawrateThrustCallback(GzRollPitchYawrateThrustMsgPtr&
-                                          roll_pitch_yawrate_thrust_msg);
+  void RollPitchYawrateThrustCallback(
+      GzRollPitchYawrateThrustMsgPtr& roll_pitch_yawrate_thrust_msg);
 
   /// \brief    Processes the wind speed readings.
   /// \details  Stores the most current wind speed reading for later use in
@@ -160,4 +159,4 @@ class GazeboFwDynamicsPlugin : public ModelPlugin {
 
 }  // namespace gazebo
 
-#endif // ROTORS_GAZEBO_PLUGINS_FW_DYNAMICS_PLUGIN_H
+#endif  // ROTORS_GAZEBO_PLUGINS_FW_DYNAMICS_PLUGIN_H

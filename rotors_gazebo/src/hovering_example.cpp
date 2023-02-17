@@ -18,15 +18,15 @@
  * limitations under the License.
  */
 
-#include <thread>
-#include <chrono>
-
-#include <Eigen/Core>
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/default_topics.h>
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
+
+#include <Eigen/Core>
+#include <chrono>
+#include <thread>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "hovering_example");
@@ -77,8 +77,10 @@ int main(int argc, char** argv) {
       desired_position, desired_yaw, &trajectory_msg);
 
   ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",
-           nh.getNamespace().c_str(), desired_position.x(),
-           desired_position.y(), desired_position.z());
+           nh.getNamespace().c_str(),
+           desired_position.x(),
+           desired_position.y(),
+           desired_position.z());
   trajectory_pub.publish(trajectory_msg);
 
   ros::spinOnce();
