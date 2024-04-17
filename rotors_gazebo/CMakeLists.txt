@@ -10,7 +10,7 @@ add_definitions(-std=c++17)
 # We need Gazebo version >= 3.0.0 to generate iris.sdf file (gz sdf ... command
 # needs to be available)
 find_package(gazebo REQUIRED)
-find_package(PythonInterp REQUIRED)
+find_package(Python 3 REQUIRED)
 
 if(${gazebo_VERSION_MAJOR} GREATER 2)
   message(STATUS "Building iris.sdf.")
@@ -30,7 +30,7 @@ if(${gazebo_VERSION_MAJOR} GREATER 2)
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND rm -f ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf
     COMMAND
-      ${PYTHON_EXECUTABLE} ${scripts_dir}/xacro.py -o
+      ${Python_EXECUTABLE} ${scripts_dir}/xacro.py -o
       ${rotors_description_dir}/urdf/iris_base.urdf
       ${rotors_description_dir}/urdf/iris_base.xacro
       enable_mavlink_interface:=${enable_mavlink_interface}
