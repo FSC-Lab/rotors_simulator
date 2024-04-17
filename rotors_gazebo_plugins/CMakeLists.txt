@@ -1,35 +1,41 @@
-# Optional arguments to be passed into file
-# ADDITIONAL_INCLUDE_DIRS           string  Additional include directories to add to every build target (PX4 uses this).
+# Optional arguments to be passed into file ADDITIONAL_INCLUDE_DIRS string
+# Additional include directories to add to every build target (PX4 uses this).
 # BUILD_MAVLINK_TOGGLE              bool    Enable or disable mavlink plugin
-# BUILD_MAVLINK_INTERFACE_PLUGIN    bool    Build mavlink_interface_plugin if mavlink found (requires mav dependency).
-# BUILD_OCTOMAP_PLUGIN              bool    Build the optical map plugin (requires Octomap).
-# BUILD_OPTICAL_FLOW_PLUGIN         bool    Build the optical flow plugin (requires OpenCV).
-# MAVLINK_HEADER_DIR                string  Location of MAVLink header files. If not provided, this CMakeLists.txt file will
-#                                               search the default locations (e.g. ROS) for them. This variable is only required
-#                                               if BUILD_MAVLINK_INTERFACE_PLUGIN=TRUE.
-# NO_ROS                            bool    Build without any ROS dependencies.
+# BUILD_MAVLINK_INTERFACE_PLUGIN    bool    Build mavlink_interface_plugin if
+# mavlink found (requires mav dependency). BUILD_OCTOMAP_PLUGIN bool    Build
+# the optical map plugin (requires Octomap). BUILD_OPTICAL_FLOW_PLUGIN bool
+# Build the optical flow plugin (requires OpenCV). MAVLINK_HEADER_DIR string
+# Location of MAVLink header files. If not provided, this CMakeLists.txt file
+# will search the default locations (e.g. ROS) for them. This variable is only
+# required if BUILD_MAVLINK_INTERFACE_PLUGIN=TRUE. NO_ROS bool    Build without
+# any ROS dependencies.
 
 cmake_minimum_required(VERSION 2.8.3)
 project(rotors_gazebo_plugins)
 
 #
-#if ( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR} )
-#  message( FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt." )
-#endif()
+# if ( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR} ) message( FATAL_ERROR
+# "In-source builds not allowed. Please make a new directory (called a build
+# directory) and run CMake from there. You may need to remove CMakeCache.txt." )
+# endif()
 
-#message(STATUS "rotors_gazebo_plugins CMakeLists.txt called.")
+# message(STATUS "rotors_gazebo_plugins CMakeLists.txt called.")
 
-# =============================================================================================== #
-# ========================== SET DEFAULTS FOR PASSED-IN VARIABLES =============================== #
-# =============================================================================================== #
+# ===============================================================================================
+# # ========================== SET DEFAULTS FOR PASSED-IN VARIABLES
+# =============================== #
+# ===============================================================================================
+# #
 
 if(NOT DEFINED BUILD_OCTOMAP_PLUGIN)
-  message(STATUS "BUILD_OCTOMAP_PLUGIN variable not provided, setting to FALSE.")
+  message(
+    STATUS "BUILD_OCTOMAP_PLUGIN variable not provided, setting to FALSE.")
   set(BUILD_OCTOMAP_PLUGIN FALSE)
 endif()
 
 if(NOT DEFINED BUILD_OPTICAL_FLOW_PLUGIN)
-  message(STATUS "BUILD_OPTICAL_FLOW_PLUGIN variable not provided, setting to FALSE.")
+  message(
+    STATUS "BUILD_OPTICAL_FLOW_PLUGIN variable not provided, setting to FALSE.")
   set(BUILD_OPTICAL_FLOW_PLUGIN FALSE)
 endif()
 
@@ -38,12 +44,14 @@ if(NOT DEFINED NO_ROS)
   set(NO_ROS FALSE)
 endif()
 
-# Add any additional include directories as specified by the calling process (either user or another CMake file).
-# ASL: Doesn't use this, catkin manages the mav_comm dependency
-# PX4: Provides include directory for mav_msgs, so that "mav_msgs/default_topics.h" can be found and used.
+# Add any additional include directories as specified by the calling process
+# (either user or another CMake file). ASL: Doesn't use this, catkin manages the
+# mav_comm dependency PX4: Provides include directory for mav_msgs, so that
+# "mav_msgs/default_topics.h" can be found and used.
 include_directories(${ADDITIONAL_INCLUDE_DIRS})
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}"
+                      "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
 set(BUILD_MAVLINK_TOGGLE TRUE) # Set to TRUE to build MAVLINK plugin
@@ -62,83 +70,106 @@ else()
   set(BUILD_MAVLINK_INTERFACE_PLUGIN FALSE)
 endif()
 
-# Initialise a list which will keep track of all targets
-# that need to be installed.
+# Initialise a list which will keep track of all targets that need to be
+# installed.
 set(targets_to_install "")
 
-# =============================================================================================== #
-# ======================================== STATUS MESSAGES ====================================== #
-# =============================================================================================== #
+# ===============================================================================================
+# # ======================================== STATUS MESSAGES
+# ====================================== #
+# ===============================================================================================
+# #
 
 message(STATUS "ADDITIONAL_INCLUDE_DIRS = ${ADDITIONAL_INCLUDE_DIRS}")
 
 if(BUILD_OCTOMAP_PLUGIN)
   message(STATUS "BUILD_OCTOMAP_PLUGIN = TRUE, building gazebo_octomap_plugin.")
-else ()
-  message(STATUS "BUILD_OCTOMAP_PLUGIN = FALSE, NOT building gazebo_octomap_plugin.")
-endif ()
+else()
+  message(
+    STATUS "BUILD_OCTOMAP_PLUGIN = FALSE, NOT building gazebo_octomap_plugin.")
+endif()
 
 if(BUILD_OPTICAL_FLOW_PLUGIN)
-  message(STATUS "BUILD_OPTICAL_FLOW_PLUGIN = TRUE, building gazebo_optical_flow_plugin.")
-else ()
-  message(STATUS "BUILD_OPTICAL_FLOW_PLUGIN = FALSE, NOT building gazebo_optical_flow_plugin.")
-endif ()
+  message(
+    STATUS
+      "BUILD_OPTICAL_FLOW_PLUGIN = TRUE, building gazebo_optical_flow_plugin.")
+else()
+  message(
+    STATUS
+      "BUILD_OPTICAL_FLOW_PLUGIN = FALSE, NOT building gazebo_optical_flow_plugin."
+  )
+endif()
 
 if(NO_ROS)
-  message(STATUS "NO_ROS = TRUE, building rotors_gazebo_plugins WITHOUT any ROS dependancies.")
+  message(
+    STATUS
+      "NO_ROS = TRUE, building rotors_gazebo_plugins WITHOUT any ROS dependancies."
+  )
 else()
-  message(STATUS "NO_ROS = FALSE, building rotors_gazebo_plugins WITH ROS dependancies.")
+  message(
+    STATUS
+      "NO_ROS = FALSE, building rotors_gazebo_plugins WITH ROS dependancies.")
 endif()
 
 # Specify C++11 standard
 add_definitions(-std=c++17)
 
-# Provides a compiler flag notifying the preprocessor about
-# the MAVLink Interface plugin build status
-add_definitions(
-  -DMAVLINK_INTERFACE=${BUILD_MAVLINK_INTERFACE_PLUGIN}
-)
+# Provides a compiler flag notifying the preprocessor about the MAVLink
+# Interface plugin build status
+add_definitions(-DMAVLINK_INTERFACE=${BUILD_MAVLINK_INTERFACE_PLUGIN})
 
 # To enable assertions when compiled in release mode.
 add_definitions(-DROS_ASSERT_ENABLED)
 
-if (NOT NO_ROS)
-  find_package(catkin REQUIRED COMPONENTS
-    gazebo_plugins
-    cv_bridge
-    geometry_msgs
-    mav_msgs
-    octomap_msgs
-    octomap_ros
-    rosbag
-    roscpp
-    rotors_comm
-    rotors_control
-    std_srvs
-    tf
-  )
+if(NOT NO_ROS)
+  find_package(
+    catkin REQUIRED
+    COMPONENTS gazebo_plugins
+               cv_bridge
+               geometry_msgs
+               mav_msgs
+               octomap_msgs
+               octomap_ros
+               rosbag
+               roscpp
+               rotors_comm
+               rotors_control
+               std_srvs
+               tf)
 endif()
 
-message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}" )
+message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
 
 find_package(Eigen REQUIRED)
 find_package(gazebo_dev QUIET)
-if (NOT GAZEBO_DEV_FOUND)
+if(NOT GAZEBO_DEV_FOUND)
   find_package(gazebo REQUIRED)
 endif()
 
 if(${gazebo_VERSION_MAJOR} LESS 9)
   if(${gazebo_VERSION_MAJOR} LESS 7)
-    message(WARN "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
+    message(
+      WARN
+      "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}"
+    )
     message(WARN "GAZEBO older than v9 detected. Autobackporting source files")
 
-    execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/autobackport/commandpre7.sh" "" WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" RESULT_VARIABLE git_result)
+    execute_process(
+      COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/autobackport/commandpre7.sh" ""
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+      RESULT_VARIABLE git_result)
 
   else()
-    message(WARN "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
+    message(
+      WARN
+      "GAZEBO Version ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}"
+    )
     message(WARN "GAZEBO older than v9 detected. Autobackporting source files")
 
-    execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/autobackport/command.sh" "" WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" RESULT_VARIABLE git_result)
+    execute_process(
+      COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/autobackport/command.sh" ""
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+      RESULT_VARIABLE git_result)
   endif()
 
 endif()
@@ -150,15 +181,13 @@ include_directories(${GAZEBO_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-
-if (BUILD_MAVLINK_INTERFACE_PLUGIN)
+if(BUILD_MAVLINK_INTERFACE_PLUGIN)
   include_directories(${mavros_msgs_INCLUDE_DIRS})
   include_directories(${libmavconn_INCLUDE_DIRS})
 endif()
 
-# ============================================== #
-# =================== YAML_CPP ================= #
-# ============================================== #
+# ============================================== # =================== YAML_CPP
+# ================= # ============================================== #
 
 find_package(yaml_cpp_catkin QUIET)
 if(${yaml_cpp_catkin_FOUND})
@@ -171,9 +200,8 @@ else()
 endif()
 include_directories(${YamlCpp_INCLUDE_DIR})
 
-# ============================================== #
-# =================== PROTOBUF ================= #
-# ============================================== #
+# ============================================== # =================== PROTOBUF
+# ================= # ============================================== #
 
 set(PROTOBUF_IMPORT_DIRS "")
 foreach(ITR ${GAZEBO_INCLUDE_DIRS})
@@ -183,19 +211,19 @@ foreach(ITR ${GAZEBO_INCLUDE_DIRS})
 endforeach()
 message(STATUS "PROTOBUF_IMPORT_DIRS = " ${PROTOBUF_IMPORT_DIRS})
 
-# protobuf required for publishing/subscribing to Gazebo
-# messages
-# WARNING: THIS MUST BE RUN AFTER PROTOBUF_IMPORT_DIRS IS SETUP
+# protobuf required for publishing/subscribing to Gazebo messages WARNING: THIS
+# MUST BE RUN AFTER PROTOBUF_IMPORT_DIRS IS SETUP
 find_package(Protobuf REQUIRED)
 pkg_check_modules(PROTOBUF protobuf)
 
 # Protobuf version check
-if ("${PROTOBUF_VERSION}" VERSION_LESS "2.5.0")
-  message(FATAL_ERROR "protobuf version: ${PROTOBUF_VERSION} not compatible, must be >= 2.5.0")
+if("${PROTOBUF_VERSION}" VERSION_LESS "2.5.0")
+  message(
+    FATAL_ERROR
+      "protobuf version: ${PROTOBUF_VERSION} not compatible, must be >= 2.5.0")
 endif()
 
-# After running this block of code,
-# we should have something similar to
+# After running this block of code, we should have something similar to
 # GAZEBO_MSG_INCLUDE_DIRS = /usr/include/gazebo-7/gazebo/msgs
 set(GAZEBO_MSG_INCLUDE_DIRS)
 foreach(ITR ${GAZEBO_INCLUDE_DIRS})
@@ -208,165 +236,247 @@ endforeach()
 file(GLOB msgs msgs/*.proto)
 
 # Finally, generate the .cpp files from the .proto files
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${msgs})
 
-# Create a shared library of protobuf messages (.so extension on Linux platforms)
+# Create a shared library of protobuf messages (.so extension on Linux
+# platforms)
 add_library(mav_proto_msgs SHARED ${PROTO_SRCS})
 target_link_libraries(mav_proto_msgs ${PROTOBUF_LIBRARY} gazebo_msgs)
 list(APPEND targets_to_install mav_proto_msgs)
 
-# ============================================== #
-# ==================== CATKIN ================== #
-# ============================================== #
+# ============================================== # ==================== CATKIN
+# ================== # ============================================== #
 
-if (NOT NO_ROS)
+if(NOT NO_ROS)
 
   if(${gazebo_dev_FOUND})
     catkin_package(
-      INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-      LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-      CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp gazebo_plugins rotors_comm rotors_control std_srvs tf
-      DEPENDS Eigen octomap OpenCV
-      #CFG_EXTRAS rotors_gazebo_plugins.cmake
+      INCLUDE_DIRS
+      include
+      ${Eigen_INCLUDE_DIRS}
+      LIBRARIES
+      rotors_gazebo_motor_model
+      rotors_gazebo_controller_interface
+      CATKIN_DEPENDS
+      cv_bridge
+      geometry_msgs
+      mav_msgs
+      octomap_msgs
+      octomap_ros
+      rosbag
+      roscpp
+      gazebo_plugins
+      rotors_comm
+      rotors_control
+      std_srvs
+      tf
+      DEPENDS
+      Eigen
+      octomap
+      OpenCV
+      # CFG_EXTRAS rotors_gazebo_plugins.cmake
     )
     set(target_linking_LIBRARIES ${catkin_LIBRARIES} ${gazebo_dev_LIBRARIES})
   else()
     catkin_package(
-      INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-      LIBRARIES rotors_gazebo_motor_model rotors_gazebo_controller_interface
-      CATKIN_DEPENDS cv_bridge geometry_msgs mav_msgs octomap_msgs octomap_ros rosbag roscpp gazebo_plugins rotors_comm rotors_control std_srvs tf
-      DEPENDS Eigen octomap OpenCV
-      #CFG_EXTRAS rotors_gazebo_plugins.cmake
+      INCLUDE_DIRS
+      include
+      ${Eigen_INCLUDE_DIRS}
+      LIBRARIES
+      rotors_gazebo_motor_model
+      rotors_gazebo_controller_interface
+      CATKIN_DEPENDS
+      cv_bridge
+      geometry_msgs
+      mav_msgs
+      octomap_msgs
+      octomap_ros
+      rosbag
+      roscpp
+      gazebo_plugins
+      rotors_comm
+      rotors_control
+      std_srvs
+      tf
+      DEPENDS
+      Eigen
+      octomap
+      OpenCV
+      # CFG_EXTRAS rotors_gazebo_plugins.cmake
     )
     set(target_linking_LIBRARIES ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
   endif()
 endif()
 list(APPEND target_linking_LIBRARIES mav_proto_msgs)
 
-
-# Including GAZEBO_MSG_INCLUDE_DIRS here allows the .cpp files generated by custom .proto files to find
-# the .cpp/hpp files generated by the built-in Gazebo .proto files
+# Including GAZEBO_MSG_INCLUDE_DIRS here allows the .cpp files generated by
+# custom .proto files to find the .cpp/hpp files generated by the built-in
+# Gazebo .proto files
 include_directories(include ${catkin_INCLUDE_DIRS} ${GAZEBO_MSG_INCLUDE_DIRS})
 include_directories(${Eigen_INCLUDE_DIRS})
 
-
-# =============================================================================================== #
-# ========================================= USER LIBRARIES ====================================== #
-# =============================================================================================== #
+# ===============================================================================================
+# # ========================================= USER LIBRARIES
+# ====================================== #
+# ===============================================================================================
+# #
 
 # SORTED IN ALPHABETICAL ORDER (by "plugin" name, keep it this way!)
 
-#========================================= BAG PLUGIN ===========================================//
-# Entire GazeboBagPlugin is a heavy ROS dependency, and so rather than passing messages to
-# GazeboRosInterfacePlugin, this entire library is only included if ROS is present.
-if (NOT NO_ROS)
+# ========================================= BAG PLUGIN
+# ===========================================//
+# Entire GazeboBagPlugin is a heavy ROS dependency, and so rather than passing
+# messages to GazeboRosInterfacePlugin, this entire library is only included if
+# ROS is present.
+if(NOT NO_ROS)
   add_library(rotors_gazebo_bag_plugin SHARED src/gazebo_bag_plugin.cpp)
-  target_link_libraries(rotors_gazebo_bag_plugin ${target_linking_LIBRARIES} )
+  target_link_libraries(rotors_gazebo_bag_plugin ${target_linking_LIBRARIES})
   add_dependencies(rotors_gazebo_bag_plugin ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_bag_plugin)
 endif()
 
-#================================= CONTROLLER INTERFACE PLUGIN ==================================//
-if (NOT NO_ROS)
-  add_library(rotors_gazebo_controller_interface SHARED src/gazebo_controller_interface.cpp)
-  target_link_libraries(rotors_gazebo_controller_interface ${target_linking_LIBRARIES} )
-  add_dependencies(rotors_gazebo_controller_interface ${catkin_EXPORTED_TARGETS})
+# ================================= CONTROLLER INTERFACE PLUGIN
+# ==================================//
+if(NOT NO_ROS)
+  add_library(rotors_gazebo_controller_interface SHARED
+              src/gazebo_controller_interface.cpp)
+  target_link_libraries(rotors_gazebo_controller_interface
+                        ${target_linking_LIBRARIES})
+  add_dependencies(rotors_gazebo_controller_interface
+                   ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_controller_interface)
 endif()
 
-#=================================== GEOTAGGED IMAGES PLUGIN ====================================//
+# =================================== GEOTAGGED IMAGES PLUGIN
+# ====================================//
 
-message(STATUS "GAZEBO ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}")
+message(
+  STATUS
+    "GAZEBO ${gazebo_VERSION_MAJOR}.${gazebo_VERSION_MINOR}.${gazebo_VERSION_PATCH}"
+)
 message(STATUS "${GAZEBO_VERSION_MAJOR}")
 
 if(${gazebo_VERSION_MAJOR} GREATER 4)
-  add_library(gazebo_geotagged_images_plugin SHARED src/external/gazebo_geotagged_images_plugin.cpp)
-  target_link_libraries(gazebo_geotagged_images_plugin ${target_linking_LIBRARIES} )
-  if (NOT NO_ROS)
+  add_library(gazebo_geotagged_images_plugin SHARED
+              src/external/gazebo_geotagged_images_plugin.cpp)
+  target_link_libraries(gazebo_geotagged_images_plugin
+                        ${target_linking_LIBRARIES})
+  if(NOT NO_ROS)
     add_dependencies(gazebo_geotagged_images_plugin ${catkin_EXPORTED_TARGETS})
   endif()
   list(APPEND targets_to_install gazebo_geotagged_images_plugin)
 else()
-  message(STATUS "Gazebo version is less than 5, not building gazebo_geotagged_images_plugin.cpp.")
+  message(
+    STATUS
+      "Gazebo version is less than 5, not building gazebo_geotagged_images_plugin.cpp."
+  )
 endif()
 
-#===================================== FW DYNAMICS PLUGIN =======================================//
-if (NOT NO_ROS)
-  add_library(rotors_gazebo_fw_dynamics_plugin SHARED src/gazebo_fw_dynamics_plugin.cpp)
-  target_link_libraries(rotors_gazebo_fw_dynamics_plugin ${target_linking_LIBRARIES}  ${YamlCpp_LIBRARIES})
+# ===================================== FW DYNAMICS PLUGIN
+# =======================================//
+if(NOT NO_ROS)
+  add_library(rotors_gazebo_fw_dynamics_plugin SHARED
+              src/gazebo_fw_dynamics_plugin.cpp)
+  target_link_libraries(rotors_gazebo_fw_dynamics_plugin
+                        ${target_linking_LIBRARIES} ${YamlCpp_LIBRARIES})
   add_dependencies(rotors_gazebo_fw_dynamics_plugin ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_fw_dynamics_plugin)
 endif()
 
-#========================================= GPS PLUGIN ===========================================//
-if (NOT NO_ROS)
+# ========================================= GPS PLUGIN
+# ===========================================//
+if(NOT NO_ROS)
   add_library(rotors_gazebo_gps_plugin SHARED src/gazebo_gps_plugin.cpp)
-  target_link_libraries(rotors_gazebo_gps_plugin ${target_linking_LIBRARIES} )
+  target_link_libraries(rotors_gazebo_gps_plugin ${target_linking_LIBRARIES})
   add_dependencies(rotors_gazebo_gps_plugin ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_gps_plugin)
 endif()
 
-#========================================= IMU PLUGIN ===========================================//
-if (NOT NO_ROS)
+# ========================================= IMU PLUGIN
+# ===========================================//
+if(NOT NO_ROS)
   add_library(rotors_gazebo_imu_plugin SHARED src/gazebo_imu_plugin.cpp)
-  target_link_libraries(rotors_gazebo_imu_plugin ${target_linking_LIBRARIES} )
+  target_link_libraries(rotors_gazebo_imu_plugin ${target_linking_LIBRARIES})
   add_dependencies(rotors_gazebo_imu_plugin ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_imu_plugin)
 endif()
 
-#========================================= NoisyDepth PLUGIN ======================================//
-if (NOT NO_ROS)
+# ========================================= NoisyDepth PLUGIN
+# ======================================//
+if(NOT NO_ROS)
   if(${gazebo_dev_FOUND})
-    add_library(rotors_gazebo_noisydepth_plugin SHARED src/gazebo_noisydepth_plugin.cpp
-            src/depth_noise_model.cpp)
+    add_library(rotors_gazebo_noisydepth_plugin SHARED
+                src/gazebo_noisydepth_plugin.cpp src/depth_noise_model.cpp)
 
-    # As the depth camera plugins .so's are not part of any cmake accessible library,
-    # but the plugin path is path is, we iterate over all paths until plugin folder is found.
+    # As the depth camera plugins .so's are not part of any cmake accessible
+    # library, but the plugin path is path is, we iterate over all paths until
+    # plugin folder is found.
     foreach(subdir ${gazebo_dev_LIBRARY_DIRS})
-      if (${subdir} MATCHES "gazebo.*plugins")
-        set(gazebo_dev_DEPTHCAMERA_LIB ${subdir}/libDepthCameraPlugin${CMAKE_SHARED_LIBRARY_SUFFIX})
+      if(${subdir} MATCHES "gazebo.*plugins")
+        set(gazebo_dev_DEPTHCAMERA_LIB
+            ${subdir}/libDepthCameraPlugin${CMAKE_SHARED_LIBRARY_SUFFIX})
       endif()
     endforeach()
 
-    target_link_libraries(rotors_gazebo_noisydepth_plugin ${target_linking_LIBRARIES} ${gazebo_dev_DEPTHCAMERA_LIB})
-    if (NOT NO_ROS)
-      add_dependencies(rotors_gazebo_noisydepth_plugin ${catkin_EXPORTED_TARGETS})
+    target_link_libraries(
+      rotors_gazebo_noisydepth_plugin ${target_linking_LIBRARIES}
+      ${gazebo_dev_DEPTHCAMERA_LIB})
+    if(NOT NO_ROS)
+      add_dependencies(rotors_gazebo_noisydepth_plugin
+                       ${catkin_EXPORTED_TARGETS})
     endif()
     list(APPEND targets_to_install rotors_gazebo_noisydepth_plugin)
   else()
-    message(STATUS "Gazebo version too old (no gazebo_dev package), not building gazebo_noisydepth_plugin.cpp.")
+    message(
+      STATUS
+        "Gazebo version too old (no gazebo_dev package), not building gazebo_noisydepth_plugin.cpp."
+    )
   endif()
 endif()
 
-#======================================== LIDAR PLUGIN ==========================================//
+# ======================================== LIDAR PLUGIN
+# ==========================================//
 if(${gazebo_VERSION_MAJOR} GREATER 4)
-  add_library(rotors_gazebo_lidar_plugin SHARED src/external/gazebo_lidar_plugin.cpp)
-  target_link_libraries(rotors_gazebo_lidar_plugin ${target_linking_LIBRARIES} )
-  if (NOT NO_ROS)
+  add_library(rotors_gazebo_lidar_plugin SHARED
+              src/external/gazebo_lidar_plugin.cpp)
+  target_link_libraries(rotors_gazebo_lidar_plugin ${target_linking_LIBRARIES})
+  if(NOT NO_ROS)
     add_dependencies(rotors_gazebo_lidar_plugin ${catkin_EXPORTED_TARGETS})
   endif()
   list(APPEND targets_to_install rotors_gazebo_lidar_plugin)
 else()
-  message(STATUS "Gazebo version is less than 5, not building gazebo_lidar_plugin.cpp.")
+  message(
+    STATUS
+      "Gazebo version is less than 5, not building gazebo_lidar_plugin.cpp.")
 endif()
 
-#===================================== MAGNETOMETER PLUGIN ======================================//
-if (NOT NO_ROS)
-  add_library(rotors_gazebo_magnetometer_plugin SHARED src/gazebo_magnetometer_plugin.cpp)
-  target_link_libraries(rotors_gazebo_magnetometer_plugin ${target_linking_LIBRARIES} )
+# ===================================== MAGNETOMETER PLUGIN
+# ======================================//
+if(NOT NO_ROS)
+  add_library(rotors_gazebo_magnetometer_plugin SHARED
+              src/gazebo_magnetometer_plugin.cpp)
+  target_link_libraries(rotors_gazebo_magnetometer_plugin
+                        ${target_linking_LIBRARIES})
   add_dependencies(rotors_gazebo_magnetometer_plugin ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_magnetometer_plugin)
 endif()
 
-#================================= MAVLINK INTERFACE PLUGIN =====================================//
+# ================================= MAVLINK INTERFACE PLUGIN
+# =====================================//
 
 if(BUILD_MAVLINK_INTERFACE_PLUGIN)
-  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = TRUE, adding mavros dependency and building mavlink_interface_plugin.")
-else ()
-  message(STATUS "BUILD_MAVLINK_INTERFACE_PLUGIN = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin.")
-endif ()
+  message(
+    STATUS
+      "BUILD_MAVLINK_INTERFACE_PLUGIN = TRUE, adding mavros dependency and building mavlink_interface_plugin."
+  )
+else()
+  message(
+    STATUS
+      "BUILD_MAVLINK_INTERFACE_PLUGIN = FALSE, NOT adding mavros dependency and NOT building mavlink_interface_plugin."
+  )
+endif()
 
-if (BUILD_MAVLINK_INTERFACE_PLUGIN)
+if(BUILD_MAVLINK_INTERFACE_PLUGIN)
   set(MAVLINK_HEADER_DIR ${MAVLINK_INCLUDE_DIRS})
   if(NO_ROS)
     # We need the MAVLink headers.
@@ -378,21 +488,32 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
       include_directories(${MAVLINK_HEADER_DIR})
       set(MAVLINK_HEADERS_FOUND TRUE)
     else()
-      message(WARN "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths...")
+      message(
+        WARN
+        "MAVLINK_HEADER_DIR not provided, falling back to looking at default paths..."
+      )
       # fist check if there's a mavlink dir in the current workspace
       if(EXISTS ${mavlink_INCLUDE_DIRS}/mavlink/v2.0)
-        message(STATUS "Found MAVLink headers in workspace at ' ${mavlink_INCLUDE_DIRS}/mavlink/v2.0/'.")
+        message(
+          STATUS
+            "Found MAVLink headers in workspace at ' ${mavlink_INCLUDE_DIRS}/mavlink/v2.0/'."
+        )
         include_directories("${mavlink_INCLUDE_DIRS}/mavlink/v2.0/")
         set(MAVLINK_HEADERS_FOUND TRUE)
-      # If ROS is installed, we should be able to find them at the path below
+        # If ROS is installed, we should be able to find them at the path below
       elseif(EXISTS /opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/)
-        message(STATUS "Found MAVLink headers at '/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/'.")
+        message(
+          STATUS
+            "Found MAVLink headers at '/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/'."
+        )
         include_directories("/opt/ros/$ENV{ROS_DISTRO}/include/mavlink/v2.0/")
         set(MAVLINK_HEADERS_FOUND TRUE)
       endif()
     endif()
-    add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
-    target_link_libraries(rotors_gazebo_mavlink_interface ${target_linking_LIBRARIES}  ${mav_msgs})
+    add_library(rotors_gazebo_mavlink_interface SHARED
+                src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
+    target_link_libraries(rotors_gazebo_mavlink_interface
+                          ${target_linking_LIBRARIES} ${mav_msgs})
     list(APPEND targets_to_install rotors_gazebo_mavlink_interface)
   else()
     set(MAVROS_VALID FALSE)
@@ -405,139 +526,177 @@ if (BUILD_MAVLINK_INTERFACE_PLUGIN)
     if(mavros_VERSION_MAJOR GREATER 0 OR mavros_VERSION_MINOR GREATER 17)
       set(MAVROS_VALID TRUE)
     else()
-      message(WARN "MAVROS version too old (${mavros_VERSION}) - need version newer than 0.17, not building MavlinkInterfacePlugin")
+      message(
+        WARN
+        "MAVROS version too old (${mavros_VERSION}) - need version newer than 0.17, not building MavlinkInterfacePlugin"
+      )
     endif()
 
     if(NOT MAVLINK_HEADERS_FOUND)
-      message(ERROR "MAVLink headers were not found. They are required for building MavlinkInterfacePlugin. Not building MavlinkInterfacePlugin.")
+      message(
+        ERROR
+        "MAVLink headers were not found. They are required for building MavlinkInterfacePlugin. Not building MavlinkInterfacePlugin."
+      )
     endif()
 
     if(MAVLINK_HEADERS_FOUND AND MAVROS_VALID)
-    message(WARN "Mavlink headers found and mavros version check successful, building MavlinkInterfacePlugin")
-    # Note that this library includes TWO .cpp files.
-    add_library(rotors_gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
-    target_link_libraries(rotors_gazebo_mavlink_interface ${target_linking_LIBRARIES}  ${mav_msgs})
-    add_dependencies(rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS} ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
-    list(APPEND targets_to_install rotors_gazebo_mavlink_interface)
+      message(
+        WARN
+        "Mavlink headers found and mavros version check successful, building MavlinkInterfacePlugin"
+      )
+      # Note that this library includes TWO .cpp files.
+      add_library(rotors_gazebo_mavlink_interface SHARED
+                  src/gazebo_mavlink_interface.cpp src/geo_mag_declination.cpp)
+      target_link_libraries(rotors_gazebo_mavlink_interface
+                            ${target_linking_LIBRARIES} ${mav_msgs})
+      add_dependencies(
+        rotors_gazebo_mavlink_interface ${catkin_EXPORTED_TARGETS}
+        ${mavros_EXPORTED_TARGETS} ${mavros_msgs_EXPORTED_TARGETS})
+      list(APPEND targets_to_install rotors_gazebo_mavlink_interface)
     endif()
   endif()
 
 endif()
 
-#==================================== MOTOR MODEL PLUGIN ========================================//
-if (NOT NO_ROS)
+# ==================================== MOTOR MODEL PLUGIN
+# ========================================//
+if(NOT NO_ROS)
   add_library(rotors_gazebo_motor_model SHARED src/gazebo_motor_model.cpp)
-  target_link_libraries(rotors_gazebo_motor_model ${target_linking_LIBRARIES} )
+  target_link_libraries(rotors_gazebo_motor_model ${target_linking_LIBRARIES})
   add_dependencies(rotors_gazebo_motor_model ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_motor_model)
 endif()
 
-#==================================== MULTIROTOR BASE PLUGIN ====================================//
-if (NOT NO_ROS)
-  add_library(rotors_gazebo_multirotor_base_plugin SHARED src/gazebo_multirotor_base_plugin.cpp)
-  target_link_libraries(rotors_gazebo_multirotor_base_plugin ${target_linking_LIBRARIES} )
-  add_dependencies(rotors_gazebo_multirotor_base_plugin ${catkin_EXPORTED_TARGETS})
+# ==================================== MULTIROTOR BASE PLUGIN
+# ====================================//
+if(NOT NO_ROS)
+  add_library(rotors_gazebo_multirotor_base_plugin SHARED
+              src/gazebo_multirotor_base_plugin.cpp)
+  target_link_libraries(rotors_gazebo_multirotor_base_plugin
+                        ${target_linking_LIBRARIES})
+  add_dependencies(rotors_gazebo_multirotor_base_plugin
+                   ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_multirotor_base_plugin)
 endif()
 
-#====================================== OCTOMAP PLUGIN ==========================================//
+# ====================================== OCTOMAP PLUGIN
+# ==========================================//
 
-# Conditionally built since it requires Octomap as a dependency
-# ASL uses this, PX4 does not
+# Conditionally built since it requires Octomap as a dependency ASL uses this,
+# PX4 does not
 if(BUILD_OCTOMAP_PLUGIN)
   find_package(octomap REQUIRED)
   add_library(rotors_gazebo_octomap_plugin SHARED src/gazebo_octomap_plugin.cpp)
-  target_link_libraries(rotors_gazebo_octomap_plugin ${target_linking_LIBRARIES} )
-  if (NOT NO_ROS)
+  target_link_libraries(rotors_gazebo_octomap_plugin
+                        ${target_linking_LIBRARIES})
+  if(NOT NO_ROS)
     add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
   endif()
   list(APPEND targets_to_install rotors_gazebo_octomap_plugin)
 endif()
 
-#======================================= ODOMETRY PLUGIN ========================================//
-if (NOT NO_ROS)
-  add_library(rotors_gazebo_odometry_plugin SHARED src/gazebo_odometry_plugin.cpp)
-  target_link_libraries(rotors_gazebo_odometry_plugin ${target_linking_LIBRARIES}  ${OpenCV_LIBRARIES})
+# ======================================= ODOMETRY PLUGIN
+# ========================================//
+if(NOT NO_ROS)
+  add_library(rotors_gazebo_odometry_plugin SHARED
+              src/gazebo_odometry_plugin.cpp)
+  target_link_libraries(rotors_gazebo_odometry_plugin
+                        ${target_linking_LIBRARIES} ${OpenCV_LIBRARIES})
   add_dependencies(rotors_gazebo_odometry_plugin ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_odometry_plugin)
 endif()
 
-#===================================== OPTICAL FLOW PLUGIN ======================================//
-# Since the optical flow plugin depends on external code (PX4/OpticalFlow), this is
-# only conditionally built
+# ===================================== OPTICAL FLOW PLUGIN
+# ======================================//
+# Since the optical flow plugin depends on external code (PX4/OpticalFlow), this
+# is only conditionally built
 if(BUILD_OPTICAL_FLOW_PLUGIN)
 
   # Check to make sure the correct Gazebo version is available.
   if(${gazebo_VERSION_MAJOR} LESS 5)
-    message(FATAL_ERROR "Gazebo version needs to be >= v5.x. You specified BUILD_OPTICAL_FLOW_PLUGIN=TRUE, but Gazebo version was less than v5.x.")
+    message(
+      FATAL_ERROR
+        "Gazebo version needs to be >= v5.x. You specified BUILD_OPTICAL_FLOW_PLUGIN=TRUE, but Gazebo version was less than v5.x."
+    )
   endif()
 
   find_package(Boost 1.40.0 REQUIRED timer)
 
-  # OpticalFlow needs to be built and installed by the calling script, as it is very
-  # unlikely that this package already exists on the users computer.
-  # In PX4 this is done with a call to ExternalProject_Add().
+  # OpticalFlow needs to be built and installed by the calling script, as it is
+  # very unlikely that this package already exists on the users computer. In PX4
+  # this is done with a call to ExternalProject_Add().
   find_package(OpticalFlow REQUIRED)
 
-  add_library(rotors_gazebo_optical_flow_plugin SHARED src/external/gazebo_optical_flow_plugin.cpp)
-  target_include_directories(rotors_gazebo_optical_flow_plugin PUBLIC ${OpticalFlow_INCLUDE_DIRS})
-  target_link_libraries(rotors_gazebo_optical_flow_plugin
-    ${target_linking_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${OpticalFlow_LIBRARIES})
-  if (NOT NO_ROS)
-    add_dependencies(rotors_gazebo_optical_flow_plugin ${catkin_EXPORTED_TARGETS})
+  add_library(rotors_gazebo_optical_flow_plugin SHARED
+              src/external/gazebo_optical_flow_plugin.cpp)
+  target_include_directories(rotors_gazebo_optical_flow_plugin
+                             PUBLIC ${OpticalFlow_INCLUDE_DIRS})
+  target_link_libraries(
+    rotors_gazebo_optical_flow_plugin ${target_linking_LIBRARIES}
+    ${Boost_LIBRARIES} ${OpticalFlow_LIBRARIES})
+  if(NOT NO_ROS)
+    add_dependencies(rotors_gazebo_optical_flow_plugin
+                     ${catkin_EXPORTED_TARGETS})
   endif()
   list(APPEND targets_to_install rotors_gazebo_optical_flow_plugin)
 endif()
 
-#======================================= PRESSURE PLUGIN ========================================//
+# ======================================= PRESSURE PLUGIN
+# ========================================//
 add_library(rotors_gazebo_pressure_plugin SHARED src/gazebo_pressure_plugin.cpp)
-target_link_libraries(rotors_gazebo_pressure_plugin ${target_linking_LIBRARIES}  ${GLOG_LIBRARIES})
-if (NOT NO_ROS)
+target_link_libraries(rotors_gazebo_pressure_plugin ${target_linking_LIBRARIES}
+                      ${GLOG_LIBRARIES})
+if(NOT NO_ROS)
   add_dependencies(rotors_gazebo_pressure_plugin ${catkin_EXPORTED_TARGETS})
 endif()
 list(APPEND targets_to_install rotors_gazebo_pressure_plugin)
 
-#===================================== ROS INTERFACE PLUGIN =====================================//
+# ===================================== ROS INTERFACE PLUGIN
+# =====================================//
 # This entire plugin is only built if ROS is a dependency
-if (NOT NO_ROS)
-  add_library(rotors_gazebo_ros_interface_plugin SHARED src/gazebo_ros_interface_plugin.cpp)
-  target_link_libraries(rotors_gazebo_ros_interface_plugin ${target_linking_LIBRARIES} )
-  add_dependencies(rotors_gazebo_ros_interface_plugin ${catkin_EXPORTED_TARGETS})
+if(NOT NO_ROS)
+  add_library(rotors_gazebo_ros_interface_plugin SHARED
+              src/gazebo_ros_interface_plugin.cpp)
+  target_link_libraries(rotors_gazebo_ros_interface_plugin
+                        ${target_linking_LIBRARIES})
+  add_dependencies(rotors_gazebo_ros_interface_plugin
+                   ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_ros_interface_plugin)
 endif()
 
-#========================================= WIND PLUGIN ==========================================//
-if (NOT NO_ROS)
+# ========================================= WIND PLUGIN
+# ==========================================//
+if(NOT NO_ROS)
   add_library(rotors_gazebo_wind_plugin SHARED src/gazebo_wind_plugin.cpp)
-  target_link_libraries(rotors_gazebo_wind_plugin ${target_linking_LIBRARIES} )
+  target_link_libraries(rotors_gazebo_wind_plugin ${target_linking_LIBRARIES})
   add_dependencies(rotors_gazebo_wind_plugin ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_wind_plugin)
 endif()
 
-# =============================================================================================== #
-# ======================================= EXTERNAL LIBRARIES ==================================== #
-# =============================================================================================== #
+# ===============================================================================================
+# # ======================================= EXTERNAL LIBRARIES
+# ==================================== #
+# ===============================================================================================
+# #
 
 # liftdrag_plugin is provided by Gazebo, but not guaranteed to be on system.
-# Naming has not been changed to match rotors convetion, due to this being an external
-# code soure.
-# Linux is not consistent with plugin availability, even on Gazebo 7
-#if("${GAZEBO_VERSION}" VERSION_LESS "7.0")
+# Naming has not been changed to match rotors convetion, due to this being an
+# external code soure. Linux is not consistent with plugin availability, even on
+# Gazebo 7 if("${GAZEBO_VERSION}" VERSION_LESS "7.0")
 if(${gazebo_VERSION_MAJOR} GREATER 4)
   add_library(LiftDragPlugin SHARED src/liftdrag_plugin/liftdrag_plugin.cpp)
-  target_link_libraries(LiftDragPlugin ${target_linking_LIBRARIES} )
-  if (NOT NO_ROS)
+  target_link_libraries(LiftDragPlugin ${target_linking_LIBRARIES})
+  if(NOT NO_ROS)
     add_dependencies(LiftDragPlugin ${catkin_EXPORTED_TARGETS})
   endif()
   list(APPEND targets_to_install LiftDragPlugin)
 else()
-  message(STATUS "Gazebo version is less than 5, not building liftdrag_plugin.cpp.")
+  message(
+    STATUS "Gazebo version is less than 5, not building liftdrag_plugin.cpp.")
 endif()
 
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
-if (NOT NO_ROS)
+if(NOT NO_ROS)
   set(BIN_DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
   set(LIB_DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 else()
@@ -545,13 +704,11 @@ else()
   set(LIB_DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
-# Install all targets that were defined above (some conditionally) and added to the
-# variable targets_to_install
+# Install all targets that were defined above (some conditionally) and added to
+# the variable targets_to_install
 install(
-  TARGETS
-    ${targets_to_install}
+  TARGETS ${targets_to_install}
   DESTINATION ${BIN_DESTINATION}
-  LIBRARY DESTINATION ${LIB_DESTINATION}
-)
+  LIBRARY DESTINATION ${LIB_DESTINATION})
 
-#message(FATAL_ERROR "Reached EOF.")
+# message(FATAL_ERROR "Reached EOF.")
