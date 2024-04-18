@@ -1,0 +1,46 @@
+If:
+  PathMatch: rqt_rotors/.*
+CompileFlags:
+  CompilationDatabase: ../../build/rqt_rotors
+
+---
+If:
+  PathMatch: rotors_simulator/.*
+CompileFlags:
+  CompilationDatabase: ../../build/rotors_simulator
+
+---
+If:
+  PathMatch: rotors_control/.*
+CompileFlags:
+  CompilationDatabase: ../../build/rotors_control
+
+---
+If:
+  PathMatch: rotors_evaluation/.*
+CompileFlags:
+  CompilationDatabase: ../../build/rotors_evaluation
+
+---
+If:
+  PathMatch: rotors_comm/.*
+CompileFlags:
+  CompilationDatabase: ../../build/rotors_comm
+
+---
+If:
+  PathMatch: rotors_description/.*
+CompileFlags:
+  CompilationDatabase: ../../build/rotors_description
+
+---
+If:
+  PathMatch: rotors_gazebo/.*
+CompileFlags:
+  CompilationDatabase: ../../build/rotors_gazebo
+
+---
+If:
+  PathMatch: rotors_gazebo_plugins/.*
+CompileFlags:
+  CompilationDatabase: ../../build/rotors_gazebo_plugins
