@@ -27,12 +27,6 @@ project(rotors_gazebo_plugins)
 # ===============================================================================================
 # #
 
-if(NOT DEFINED BUILD_OCTOMAP_PLUGIN)
-  message(
-    STATUS "BUILD_OCTOMAP_PLUGIN variable not provided, setting to FALSE.")
-  set(BUILD_OCTOMAP_PLUGIN FALSE)
-endif()
-
 if(NOT DEFINED BUILD_OPTICAL_FLOW_PLUGIN)
   message(
     STATUS "BUILD_OPTICAL_FLOW_PLUGIN variable not provided, setting to FALSE.")
@@ -82,13 +76,6 @@ set(targets_to_install "")
 
 message(STATUS "ADDITIONAL_INCLUDE_DIRS = ${ADDITIONAL_INCLUDE_DIRS}")
 
-if(BUILD_OCTOMAP_PLUGIN)
-  message(STATUS "BUILD_OCTOMAP_PLUGIN = TRUE, building gazebo_octomap_plugin.")
-else()
-  message(
-    STATUS "BUILD_OCTOMAP_PLUGIN = FALSE, NOT building gazebo_octomap_plugin.")
-endif()
-
 if(BUILD_OPTICAL_FLOW_PLUGIN)
   message(
     STATUS
@@ -128,8 +115,6 @@ if(NOT NO_ROS)
                cv_bridge
                geometry_msgs
                mav_msgs
-               octomap_msgs
-               octomap_ros
                rosbag
                roscpp
                rotors_comm
@@ -261,8 +246,6 @@ if(NOT NO_ROS)
       cv_bridge
       geometry_msgs
       mav_msgs
-      octomap_msgs
-      octomap_ros
       rosbag
       roscpp
       gazebo_plugins
@@ -272,7 +255,6 @@ if(NOT NO_ROS)
       tf
       DEPENDS
       Eigen
-      octomap
       OpenCV
       # CFG_EXTRAS rotors_gazebo_plugins.cmake
     )
@@ -289,8 +271,6 @@ if(NOT NO_ROS)
       cv_bridge
       geometry_msgs
       mav_msgs
-      octomap_msgs
-      octomap_ros
       rosbag
       roscpp
       gazebo_plugins
@@ -300,7 +280,6 @@ if(NOT NO_ROS)
       tf
       DEPENDS
       Eigen
-      octomap
       OpenCV
       # CFG_EXTRAS rotors_gazebo_plugins.cmake
     )
@@ -577,22 +556,6 @@ if(NOT NO_ROS)
   add_dependencies(rotors_gazebo_multirotor_base_plugin
                    ${catkin_EXPORTED_TARGETS})
   list(APPEND targets_to_install rotors_gazebo_multirotor_base_plugin)
-endif()
-
-# ====================================== OCTOMAP PLUGIN
-# ==========================================//
-
-# Conditionally built since it requires Octomap as a dependency ASL uses this,
-# PX4 does not
-if(BUILD_OCTOMAP_PLUGIN)
-  find_package(octomap REQUIRED)
-  add_library(rotors_gazebo_octomap_plugin SHARED src/gazebo_octomap_plugin.cpp)
-  target_link_libraries(rotors_gazebo_octomap_plugin
-                        ${target_linking_LIBRARIES})
-  if(NOT NO_ROS)
-    add_dependencies(rotors_gazebo_octomap_plugin ${catkin_EXPORTED_TARGETS})
-  endif()
-  list(APPEND targets_to_install rotors_gazebo_octomap_plugin)
 endif()
 
 # ======================================= ODOMETRY PLUGIN
