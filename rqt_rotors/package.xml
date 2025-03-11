@@ -20,8 +20,4 @@
   <depend>rqt_gui_py</depend>
   <depend>rqt_gui</depend>
 
-  <export>
-    <rqt_gui plugin="${prefix}/plugin.xml"/>
-  </export>
-
 </package>

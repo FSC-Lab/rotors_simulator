@@ -28,9 +28,5 @@ catkin_package(
   DEPENDS)
 catkin_python_setup()
 
-install(FILES plugin.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
 install(DIRECTORY resource DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-install(PROGRAMS scripts/hil_plugin
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
